@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <button data-note="c">C</button>
+    <button data-note="d">D</button>
+    <button data-note="e">E</button>
+    <button data-note="f">F</button>
+
+    <button id="rand-chord">Rand chord</button>    
+
+    <script type="text/javascript">
+        var C2, C3, C4, C5;
+
+        const context = new AudioContext();
+
+        const getSound1 = new XMLHttpRequest();
+        getSound1.open("GET", "c2mmell.wav", true);
+        getSound1.responseType = "arraybuffer";
+        getSound1.onload = function () {
+            context.decodeAudioData(getSound1.response, function (buffer) {
+                C2 = buffer;
+            });
+        };
+        getSound1.send();
+
+
+        const getSound2 = new XMLHttpRequest();
+        getSound2.open("GET", "c3mmell.wav", true);
+        getSound2.responseType = "arraybuffer";
+        getSound2.onload = function () {
+            context.decodeAudioData(getSound2.response, function (buffer) {
+                C3 = buffer;
+            });
+        };
+        getSound2.send();
+
+        const getSound3 = new XMLHttpRequest();
+        getSound3.open("GET", "c4mmell.wav", true);
+        getSound3.responseType = "arraybuffer";
+        getSound3.onload = function () {
+            context.decodeAudioData(getSound3.response, function (buffer) {
+                C4 = buffer;
+            });
+        };
+        getSound3.send();
+
+        const getSound4 = new XMLHttpRequest();
+        getSound4.open("GET", "c5mmell.wav", true);
+        getSound4.responseType = "arraybuffer";
+        getSound4.onload = function () {
+            context.decodeAudioData(getSound4.response, function (buffer) {
+                C5 = buffer;
+            });
+        };
+        getSound4.send();
+
+        const selectRandom = (array) => {
+            return array[Math.trunc(Math.random() * array.length)]; 
+        };
+
+        const pullRandom = (array) => {
+            return array.splice([Math.trunc(Math.random() * array.length)], 1); 
+        };
+
+        const scaleDegrees = [
+            1,
+            1.059463,
+            1.122462,
+            1.189207,
+            1.259921,
+            1.334840,
+            1.414214,
+            1.498307,
+            1.587401,
+            1.681793,
+            1.781797,
+            1.887749
+        ];
+
+        const constructMinor = () => {
+            const randomNote1 = Math.trunc(Math.random() * 12);
+            const randomNote2 = (randomNote1 + 3) % 12;
+            const randomNote3 = (randomNote2 + 4) % 12;
+            console.log(randomNote1, randomNote2, randomNote3);
+            return [randomNote1, randomNote2, randomNote3].map(note => scaleDegrees[note]);
+        };
+
+        const getNote = (note) => {
+            scaleStep = note.split("_")[0];
+            octave = note.split("_")[1];
+
+            return scaleStep == "c" ? {
+                octave : octave,
+                playbackRate : 1.0
+            } :
+
+            scaleStep == "d" ? {
+                octave : octave,
+                playbackRate : 1.122462
+            } :
+
+            scaleStep == "e" ? {
+                octave : octave,
+                playbackRate : 1.259921
+            } :
+
+            scaleStep == "f" ? {
+                octave : octave,
+                playbackRate : 1.334840
+            } :
+
+            scaleStep == "g" ? {
+                octave : octave,
+                playbackRate : 1.498307
+            } :
+
+            scaleStep == "a" ? {
+                octave : octave,
+                playbackRate : 1.681793
+            } :
+
+            scaleStep == "h" ? {
+                octave : octave,
+                playbackRate : 1.887749
+            } : (() => { throw "wrong note letter: " + scaleStep })()
+
+        };
+
+        const playSound = (playbackRate, octave) => {
+            console.log(octave, playbackRate)
+            octave = parseInt(octave, 10);
+            const source = context.createBufferSource(); 
+            source.buffer = octave == 2 ? C2 : octave == 3 ? C3 : octave == 4 ? C4 : octave == 5 ? C5 : (() => { throw "wrong octave: " + octave })();
+            source.connect(context.destination);
+            source.playbackRate.value = playbackRate
+            source.start(0)
+        };
+        
+        /*Array.prototype.slice.call(document.getElementsByTagName("button")).forEach(button => {
+            button.addEventListener("click", (event) => {
+                playSound(getNote(event.target.dataset.note));
+            });
+        }); */
+
+        document.getElementById("rand-chord").addEventListener("click", (event) => {
+
+            const dMinor = ["d", "f", "a"];
+
+            const gMajor = ["d", "g", "h"];
+
+            const noteLetters = ["c_2", "d_2", "e_2", "f_2", "g_2", "a_2", "h_2",
+                "c_3", "d_3", "e_3", "f_3", "g_3", "a_3", "h_3",
+                "c_4", "d_4", "e_4", "f_4", "g_4", "a_4", "h_4",
+                "c_5", "d_5", "e_5", "f_5", "g_5", "a_5", "h_5"];
+            
+            const getRandomNoteFromChord = (chord) => {
+
+                const scaleStep = pullRandom(chord);
+
+                const randOctave = Math.trunc(Math.random() * 4) + 2;
+
+                console.log(`${scaleStep}_${randOctave}`);
+                return `${scaleStep}_${randOctave}`;
+
+            };
+            const chord = constructMinor();
+
+            chord.forEach(chordNote => {
+                playSound(
+                    chordNote,
+                    Math.trunc(Math.random() * 4) + 2
+                );
+            });
+
+        });
+
+    </script>
+</body>
