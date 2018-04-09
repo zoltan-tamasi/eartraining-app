@@ -18,34 +18,51 @@ object WebApp {
   case object Rotation1 extends Rotation
   case object Rotation2 extends Rotation
 
-  case class Triad(core: TriadCore, rotation: Rotation) {
-    def rotate: Triad = Triad(core, rotation match {
-      case Rotation0 => Rotation1
-      case Rotation1 => Rotation2
-      case Rotation2 => Rotation0
-    })
+  type OctaveExplode = Boolean
 
-    def buildOnNote(note: Note): Chord = {
-      rotation match {
-        case Rotation0 => {
+  type Chord = List[Note]
+
+  object Chord {
+    def apply(core: TriadCore, rotation: Rotation, octaveExplode: OctaveExplode, note: Note): Chord = {
+      (rotation, octaveExplode) match {
+        case (Rotation0, octaveExplode) => {
           val note1 = note
-          val note2 = Note.add(note1, core.intervals._1)
+          var note2 = Note.add(note1, core.intervals._1)
           val note3 = Note.add(note2, core.intervals._2)
+          if (octaveExplode) {
+            note2 = Note.add(note2, 12)
+          }
           List(note1, note2, note3)
         }
-        case Rotation1 => {
+        case (Rotation1, octaveExplode) => {
           val note1 = note
-          val note2 = Note.add(note1, core.intervals._2)
+          var note2 = Note.add(note1, core.intervals._2)
           val note3 = Note.add(note2, core.intervals._3)
+          if (octaveExplode) {
+            note2 = Note.add(note2, 12)
+          }
           List(note1, note2, note3)
         }
-        case Rotation2 => {
+        case (Rotation2, octaveExplode) => {
           val note1 = note
-          val note2 = Note.add(note1, core.intervals._3)
+          var note2 = Note.add(note1, core.intervals._3)
           val note3 = Note.add(note2, core.intervals._1)
+          if (octaveExplode) {
+            note2 = Note.add(note2, 12)
+          }
           List(note1, note2, note3)
         }
       }
+    }
+  }
+
+  case class Triad(core: TriadCore, rotation: Rotation)
+
+  object Triad {
+    def rotate(triad: Triad) = triad match {
+      case Triad(triad, Rotation0) => Triad(triad, Rotation1)
+      case Triad(triad, Rotation1) => Triad(triad, Rotation2)
+      case Triad(triad, Rotation2) => Triad(triad, Rotation0)
     }
   }
 
@@ -134,20 +151,13 @@ object WebApp {
     }
   }
 
-  def constructTriad(triadCore: TriadCore): Chord = {
+  def createRandomChordFromTriadCore(triadCore: TriadCore): Chord = {
     val randomNote = Note(pullRandom(List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B)), pullRandom(List(2, 3, 4)))
-    val triad = Triad(triadCore, pullRandom(List(Rotation0, Rotation1, Rotation2)))
-    triad.buildOnNote(randomNote)
+    Chord(triadCore, pullRandom(List(Rotation0, Rotation1, Rotation2)), pullRandom(List(true, false)), randomNote)
   }
-
-  type Chord = List[Note]
 
   def pullRandom[T](list: List[T]): T = {
     list(Random.nextInt(list.length))
-  }
-
-  def constructRandomTriad(): Chord = {
-    constructTriad(pullRandom(allTriadTypes))
   }
 
   def playChord(chord: Chord)(implicit audioEngine: AudioEngine) {
@@ -168,7 +178,7 @@ object WebApp {
     mainDiv.appendChild(resultNode)
 
     val selectedTriadType = pullRandom(allTriadTypes)
-    val chord: Chord = constructTriad(selectedTriadType)
+    val chord: Chord = createRandomChordFromTriadCore(selectedTriadType)
 
     playChord(chord)
 
