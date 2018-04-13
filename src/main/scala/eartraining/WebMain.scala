@@ -56,18 +56,48 @@ object WebApp {
     }
   }
 
-  case class Triad(core: TriadCore, rotation: Rotation)
-
-  object Triad {
-    def rotate(triad: Triad) = triad match {
-      case Triad(triad, Rotation0) => Triad(triad, Rotation1)
-      case Triad(triad, Rotation1) => Triad(triad, Rotation2)
-      case Triad(triad, Rotation2) => Triad(triad, Rotation0)
-    }
-  }
-
   sealed trait TriadCore {
     val intervals: (Int, Int, Int)
+  }
+
+  case object StackedMinor2 extends TriadCore {
+    override val intervals = (1, 1, 10)
+  }
+
+  case object Minor2PlusMajor2 extends TriadCore {
+    override val intervals = (1, 2, 9)
+  }
+
+  case object Major2PlusMinor2 extends TriadCore {
+    override val intervals = (2, 1, 9)
+  }
+
+  case object MinorMajor extends TriadCore {
+    override val intervals = (1, 3, 8)
+  }
+
+  case object MinorMajorI extends TriadCore {
+    override val intervals = (3, 1, 8)
+  }
+
+  case object Lyd extends TriadCore {
+    override val intervals = (1, 5, 6)
+  }
+
+  case object Locr extends TriadCore {
+    override val intervals = (1, 6, 5)
+  }
+
+  case object Minor7Plus6 extends TriadCore {
+    override val intervals = (2, 2, 8)
+  }
+
+  case object Minor7With3 extends TriadCore {
+    override val intervals = (2, 3, 7)
+  }
+
+  case object Minor7With5 extends TriadCore {
+    override val intervals = (2, 7, 3)
   }
 
   case object Minor extends TriadCore {
@@ -102,7 +132,8 @@ object WebApp {
     override val intervals: (Int, Int, Int) = (7, 2, 3)
   }
 
-  def allTriadTypes = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3, Stacked4s, Stacked5s)
+  def allTriadTypes = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3, Stacked4s, Stacked5s,
+    StackedMinor2, Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor, MinorMajorI, Lyd, Locr)
 
   case class AudioEngine(context: AudioContext, audioBuffers: List[AudioBuffer])
 
@@ -152,8 +183,18 @@ object WebApp {
   }
 
   def createRandomChordFromTriadCore(triadCore: TriadCore): Chord = {
-    val randomNote = Note(pullRandom(List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B)), pullRandom(List(2, 3, 4)))
-    Chord(triadCore, pullRandom(List(Rotation0, Rotation1, Rotation2)), pullRandom(List(true, false)), randomNote)
+    pullRandom(
+      for {
+        octave <- List(2, 3, 4)
+        octaveExplode <- octave match {
+          case 2 => List(true)
+          case 3 => List(true, false)
+          case 4 => List(true, false)
+        }
+        noteName <- List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B)
+        rotation <- List(Rotation0, Rotation1, Rotation2)
+      } yield Chord(triadCore, rotation, octaveExplode, Note(noteName, octave))
+    )
   }
 
   def pullRandom[T](list: List[T]): T = {

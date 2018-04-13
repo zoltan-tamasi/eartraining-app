@@ -49,7 +49,10 @@ object Note {
       case 3 => audioBuffers(1)
       case 4 => audioBuffers(2)
       case 5 => audioBuffers(3)
-      case octave => throw new Exception(s"Not supported octave: ${octave}")
+      case 6 => {
+        println(s"Not supported octave: 6, playing octave 5")
+        audioBuffers(3)
+      }
     }
     source.connect(context.destination)
     source.playbackRate.value = playbackRate(note.noteName)
