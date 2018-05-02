@@ -102,6 +102,14 @@ object WebApp {
     override val intervals = (2, 7, 3)
   }
 
+  case object LydSus2 extends TriadCore {
+    override val intervals = (2, 4, 6)
+  }
+
+  case object AugSus2 extends TriadCore {
+    override val intervals = (2, 6, 4)
+  }
+
   case object Minor extends TriadCore {
     override val intervals = (3, 4, 5)
   }
@@ -135,7 +143,7 @@ object WebApp {
   }
 
   def allTriadTypes = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3, Stacked4s, Stacked5s,
-    StackedMinor2, Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor, MinorMajorI, Lyd, Locr)
+    StackedMinor2, Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor, MinorMajorI, Lyd, Locr, LydSus2, AugSus2)
 
   case class AudioEngine(context: AudioContext, audioBuffers: List[AudioBuffer])
 
@@ -197,16 +205,19 @@ object WebApp {
 
   val chord = Var[Chord](newChord())
 
-  val guessed = Var[Boolean](false)
+  val guessed = Var[GuessStatus](NotGuessed)
 
   sealed trait Status
-
   case object Init extends Status
-
   case object Query extends Status
 
+  sealed trait GuessStatus
+  case object NotGuessed extends GuessStatus
+  case object GuessedWrong extends GuessStatus
+  case object GuessedCorrectly extends GuessStatus
+
   @dom
-  def UI(status: Var[Status], guessed: Var[Boolean], chord: Var[Chord])(implicit audioEngine: AudioEngine): Binding[Node] = {
+  def UI(status: Var[Status], guessed: Var[GuessStatus], chord: Var[Chord])(implicit audioEngine: AudioEngine): Binding[Node] = {
     status.bind match {
 
       case Init =>
@@ -228,19 +239,28 @@ object WebApp {
             Constants(allTriadTypes: _*).map {
               (triadType: TriadCore) =>
                 <button onclick = { (_ : Event) =>
-                  guessed := triadType == chord.get.core
+                  guessed := (if (triadType == chord.get.core) GuessedCorrectly else GuessedWrong)
                 }>
                   { triadType.toString }
                 </button>
             }
           }
 
-          <button onclick = { (_: Event) => chord := newChord() }>
+          <button onclick = { (_: Event) => {
+            chord := newChord()
+            guessed := NotGuessed
+            playChord(chord.get)
+          } }>
             Next
           </button>
           <span>
             {
-              if (guessed.bind) "OK" else "NO"
+              guessed.bind match {
+                case GuessedCorrectly => "Ok"
+                case GuessedWrong => "Wrong"
+                case NotGuessed => ""
+              }
+
             }
           </span>
         </div>
