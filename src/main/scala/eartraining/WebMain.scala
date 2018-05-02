@@ -1,5 +1,7 @@
 package eartraining
 
+import com.thoughtworks.binding.{Binding, dom}
+import com.thoughtworks.binding.Binding.{Constants, Var, Vars}
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.{AudioBuffer, AudioContext}
 import org.scalajs.dom.{Event, Node, document}
@@ -20,33 +22,33 @@ object WebApp {
 
   type OctaveExplode = Boolean
 
-  type Chord = List[Note]
+  case class Chord(core: TriadCore, rotation: Rotation, octaveExplode: OctaveExplode, note: Note)
 
   object Chord {
-    def apply(core: TriadCore, rotation: Rotation, octaveExplode: OctaveExplode, note: Note): Chord = {
-      (rotation, octaveExplode) match {
+    def notesOf(chord: Chord): List[Note] = {
+      (chord.rotation, chord.octaveExplode) match {
         case (Rotation0, octaveExplode) => {
-          val note1 = note
-          var note2 = Note.add(note1, core.intervals._1)
-          val note3 = Note.add(note2, core.intervals._2)
+          val note1 = chord.note
+          var note2 = Note.add(note1, chord.core.intervals._1)
+          val note3 = Note.add(note2, chord.core.intervals._2)
           if (octaveExplode) {
             note2 = Note.add(note2, 12)
           }
           List(note1, note2, note3)
         }
         case (Rotation1, octaveExplode) => {
-          val note1 = note
-          var note2 = Note.add(note1, core.intervals._2)
-          val note3 = Note.add(note2, core.intervals._3)
+          val note1 = chord.note
+          var note2 = Note.add(note1, chord.core.intervals._2)
+          val note3 = Note.add(note2, chord.core.intervals._3)
           if (octaveExplode) {
             note2 = Note.add(note2, 12)
           }
           List(note1, note2, note3)
         }
         case (Rotation2, octaveExplode) => {
-          val note1 = note
-          var note2 = Note.add(note1, core.intervals._3)
-          val note3 = Note.add(note2, core.intervals._1)
+          val note1 = chord.note
+          var note2 = Note.add(note1, chord.core.intervals._3)
+          val note3 = Note.add(note2, chord.core.intervals._1)
           if (octaveExplode) {
             note2 = Note.add(note2, 12)
           }
@@ -137,25 +139,6 @@ object WebApp {
 
   case class AudioEngine(context: AudioContext, audioBuffers: List[AudioBuffer])
 
-  def button(text: String)(handler: Node => Any): Node = {
-    val node = document.createElement("button")
-    node.appendChild(document.createTextNode(text))
-    handler(node)
-    node
-  }
-
-  def span(text: String): Node = {
-    val node = document.createElement("span")
-    node.appendChild(document.createTextNode(text))
-    node
-  }
-
-  def div(child: Node): Node = {
-    val node = document.createElement("div")
-    node.appendChild(child)
-    node
-  }
-
   def loadSound(url: String, context: AudioContext): Future[AudioBuffer] = {
     val p = Promise[AudioBuffer]()
     Ajax
@@ -202,69 +185,75 @@ object WebApp {
   }
 
   def playChord(chord: Chord)(implicit audioEngine: AudioEngine) {
-    println(s"Chord played: ${chord}")
-    chord.foreach(note => Note.playSound(note))
+    println(s"Chord played: ${Chord.notesOf(chord)}")
+    Chord.notesOf(chord).foreach(note => Note.playSound(note))
   }
 
-  def clearNode(node: Node): Unit = {
-    while ({
-      node.hasChildNodes
-    }) node.removeChild(node.lastChild)
+  def newChord(): Chord  = {
+    createRandomChordFromTriadCore(pullRandom(allTriadTypes))
   }
 
-  def startQuery(mainDiv: Node)(implicit audioEngine: AudioEngine): Unit = {
-    clearNode(mainDiv)
-    val resultNode = document.createElement("div")
-    resultNode.id = "result"
-    mainDiv.appendChild(resultNode)
+  val status = Var[Status](Init)
 
-    val selectedTriadType = pullRandom(allTriadTypes)
-    val chord: Chord = createRandomChordFromTriadCore(selectedTriadType)
+  val chord = Var[Chord](newChord())
 
-    playChord(chord)
+  val guessed = Var[Boolean](false)
 
-    mainDiv.appendChild(
-      button("Play Chord")( node => node.addEventListener("click", (event: Event) => {
-        playChord(chord)
-      }))
-    )
+  sealed trait Status
 
-    allTriadTypes.foreach {
-      triadType =>
-        mainDiv.appendChild(
-          button(triadType.toString)(node => node.addEventListener("click", (event: Event) => {
-            val resultNode = document.getElementById("result")
-            clearNode(resultNode)
-            resultNode.appendChild(
-              span(if (triadType == selectedTriadType) "Ok" else "No")
-            )
-          }))
-        )
+  case object Init extends Status
+
+  case object Query extends Status
+
+  @dom
+  def UI(status: Var[Status], guessed: Var[Boolean], chord: Var[Chord])(implicit audioEngine: AudioEngine): Binding[Node] = {
+    status.bind match {
+
+      case Init =>
+
+        <div>
+          <button onclick={ (_ : Event) => status := Query }>
+            Start
+          </button>
+        </div>
+
+      case Query =>
+
+        <div>
+          <button onclick={ (_ : Event) => playChord(chord.get) }>
+            Play Chord
+          </button>
+
+          {
+            Constants(allTriadTypes: _*).map {
+              (triadType: TriadCore) =>
+                <button onclick = { (_ : Event) =>
+                  guessed := triadType == chord.get.core
+                }>
+                  { triadType.toString }
+                </button>
+            }
+          }
+
+          <button onclick = { (_: Event) => chord := newChord() }>
+            Next
+          </button>
+          <span>
+            {
+              if (guessed.bind) "OK" else "NO"
+            }
+          </span>
+        </div>
     }
-
-    mainDiv.appendChild(
-      button("Next")( node => node.addEventListener("click", (event: Event) => {
-        startQuery(mainDiv)
-      }))
-    )
-  }
-
-  def loadMainScreen(mainDiv: Node)(implicit audioEngine: AudioEngine): Unit = {
-    mainDiv.appendChild(
-      button("Start")( node => node.addEventListener("click", (event: Event) => {
-        startQuery(mainDiv)
-      }))
-    )
   }
 
   def main(args: Array[String]): Unit = {
     val context: AudioContext = new AudioContext()
-    val mainDiv = document.body
     createAudioEngine(context)
       .onComplete {
         case Success(audioEngine) =>
           implicit val engine = audioEngine
-          loadMainScreen(mainDiv)
+          dom.render(document.body, UI(status, guessed, chord))
         case Failure(t) =>
           println("An error has occured: " + t.getMessage)
       }

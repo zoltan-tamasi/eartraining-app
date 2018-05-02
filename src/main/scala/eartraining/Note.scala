@@ -2,7 +2,25 @@ package eartraining
 
 import eartraining.WebApp.AudioEngine
 
-case class Note(noteName: NoteName, octave: Int)
+case class Note(noteName: NoteName, octave: Int) {
+  override def toString: String = {
+    val noteNameString = this.noteName match {
+      case C => "C"
+      case C_# => "C#"
+      case D => "D"
+      case D_# => "D#"
+      case E => "E"
+      case F => "F"
+      case F_# => "F#"
+      case G => "G"
+      case G_# => "G#"
+      case A => "A"
+      case A_# => "A#"
+      case B => "B"
+    }
+    s"${noteNameString}$octave"
+  }
+}
 
 object Note {
 
@@ -58,6 +76,7 @@ object Note {
     source.playbackRate.value = playbackRate(note.noteName)
     source.start(0)
   }
+
 }
 
 sealed trait NoteName
