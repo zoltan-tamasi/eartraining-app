@@ -9,8 +9,7 @@ scalaJSUseMainModuleInitializer := true
 skip in packageJSDependencies := false
 jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
 
-libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1"
-libraryDependencies += "com.lihaoyi" %% "scalatags" % "0.6.2"
+libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.5"
 
 libraryDependencies += "com.thoughtworks.binding" %%% "dom" % "10.0.2"
 libraryDependencies += "com.thoughtworks.binding" %%% "binding" % "10.0.2"
