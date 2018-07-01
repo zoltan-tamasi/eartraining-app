@@ -2,6 +2,7 @@ package eartraining
 
 import com.thoughtworks.binding.Binding.Var
 import com.thoughtworks.binding.{Binding, dom}
+import eartraining.flow.{Flow, Init, Query}
 import org.scalajs.dom.{Event, Node}
 import org.scalajs.dom.raw.HTMLInputElement
 
@@ -43,11 +44,9 @@ object UI {
   }
 
   @dom
-  def triadCoreSelection(triadCoreSet: Var[Set[TriadCore]], triadCore: TriadCore): Binding[Node] = {
+  def triadCoreSelection(triadCoreSet: Var[Set[TriadCore]], triadCore: TriadCore, queryState: Query): Binding[Node] = {
     <td>
-      <button onclick = { (_ : Event) =>
-        Flow.guessed := (if (triadCore == Flow.chord.get.core) Flow.GuessedCorrectly else Flow.GuessedWrong)
-              }>
+      <button onclick = { (_ : Event) => queryState.doGuess(triadCore) }>
         {
           triadCore.label
         }
@@ -75,13 +74,13 @@ object UI {
           Initializing...
         </div>
 
-      case Query =>
+      case queryState: Query =>
 
         <div>
           <table>
             <tbody>
               <tr>
-                { triadCoreSelection(flow.triadCoreSet, StackedMinor2).bind }
+                { triadCoreSelection(queryState.state.selectedTriadCoreSet, StackedMinor2).bind }
               </tr>
               <tr>
                 { triadCoreSelection(flow.triadCoreSet, Minor2PlusMajor2).bind }
@@ -142,7 +141,7 @@ object UI {
 
           Octave extraction
           <input type="checkbox"
-                 checked={ flow.octaveExtraction.bind }
+                 checked={ queryState.state.octaveExplodeEnabled.bind }
                  onchange={ (event: Event) =>
                    if (event.target.asInstanceOf[HTMLInputElement].checked) {
                      flow.octaveExtraction := true

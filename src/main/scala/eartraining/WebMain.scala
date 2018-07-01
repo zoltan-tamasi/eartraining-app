@@ -1,6 +1,7 @@
 package eartraining
 
 import com.thoughtworks.binding.dom
+import eartraining.flow.{Flow, Query, QuerySelector}
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.AudioContext
 
@@ -17,7 +18,7 @@ object WebApp {
       .onComplete {
         case Success(_audioEngine) =>
           Flow.audioEngineOption = Some(_audioEngine)
-          Flow.status := Query
+          Flow.goToStatus(QuerySelector)
         case Failure(t) =>
           println("An error has occured: " + t.getMessage)
       }

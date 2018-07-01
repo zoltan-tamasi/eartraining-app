@@ -52,8 +52,8 @@ object AudioEngine {
     val p = Promise[AudioBuffer]()
     Ajax
       .get(url, responseType = "arraybuffer")
-      .map { r =>
-        val arrayBuffer = r.response.asInstanceOf[ArrayBuffer]
+      .map { request =>
+        val arrayBuffer = request.response.asInstanceOf[ArrayBuffer]
         context.decodeAudioData(arrayBuffer, (buffer: AudioBuffer) => {
           p.success(buffer)
         }, () => {
