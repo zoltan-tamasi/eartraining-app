@@ -10,32 +10,26 @@ case object NotGuessed extends GuessStatus
 case object GuessedWrong extends GuessStatus
 case object GuessedCorrectly extends GuessStatus
 
-case class State(guessed: Var[GuessStatus],
-                 rotationsEnabled: Var[Boolean],
-                 octaveExplodeEnabled: Var[Boolean],
-                 actualChord: Var[Chord],
-                 selectedTriadCoreSet: Var[Set[TriadCore]])
+case class QueryState(guessed: Var[GuessStatus],
+                      rotationsEnabled: Var[Boolean],
+                      octaveExplodeEnabled: Var[Boolean],
+                      actualChord: Var[Chord],
+                      selectedTriadCoreSet: Var[Set[TriadCore]])
 
-trait Query extends FlowStatus {
-  var state: State
+class Query(val audioEngine: AudioEngine, val parent: Flow) extends FlowStatus {
 
-  def doGuess(triadCore: TriadCore): Unit = {
-    state.guessed := (if (triadCore == state.actualChord.get.core) GuessedCorrectly else GuessedWrong)
-  }
-}
+  val state = QueryState(
+    guessed = Var(NotGuessed),
+    rotationsEnabled = Var(true),
+    octaveExplodeEnabled = Var(true),
+    actualChord = Var(createRandomChordFromTriadCore(pullRandom(TriadCore.allTriadTypes),
+      octaveExplodeEnabled = true,
+      rotationsEnabled = true)),
+    selectedTriadCoreSet = Var(TriadCore.allTriadTypes.toSet))
 
-object Query {
-
-  var status = Var[State](initialState())
-
-  def initialState() = State(
-    Var(NotGuessed),
-    Var(true),
-    Var(true),
-    Var(createRandomChordFromTriadCore(pullRandom(TriadCore.allTriadTypes), octaveExplodeEnabled = true, rotationsEnabled = true)),
-    Var(TriadCore.allTriadTypes.toSet))
-
-  def createRandomChordFromTriadCore(triadCore: TriadCore, octaveExplodeEnabled: Boolean, rotationsEnabled: Boolean): Chord = {
+  private def createRandomChordFromTriadCore(triadCore: TriadCore,
+                                             octaveExplodeEnabled: Boolean,
+                                             rotationsEnabled: Boolean): Chord = {
     pullRandom(
       for {
         octave <- if (octaveExplodeEnabled) {
@@ -62,18 +56,24 @@ object Query {
     )
   }
 
-  def pullRandom[T](list: Seq[T]): T = list(Random.nextInt(list.length))
+  private def pullRandom[T](list: Seq[T]): T = list(Random.nextInt(list.length))
 
-  def next(state: State)(implicit audioEngine: AudioEngine): Unit = {
+  def next() = {
     val newChord = createRandomChordFromTriadCore(pullRandom(state.selectedTriadCoreSet.get.toList), state.octaveExplodeEnabled.get, state.rotationsEnabled.get)
     audioEngine.playChord(newChord)
     state.actualChord := newChord
   }
 
-  def apply(audioEngine: AudioEngine): Query = {
-    implicit val audioEngine = audioEngine
-    new Query {
-      override var state = initialState()
-    }
+  def doGuess(triadCore: TriadCore): Unit = {
+    state.guessed := (if (triadCore == state.actualChord.get.core) GuessedCorrectly else GuessedWrong)
   }
+
+  def playChord(chord: Chord): Unit = {
+    audioEngine.playChord(chord)
+  }
+
+  def back() = {
+    parent.back()
+  }
+
 }

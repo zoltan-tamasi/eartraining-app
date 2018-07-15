@@ -3,26 +3,29 @@ package eartraining.flow
 import com.thoughtworks.binding.Binding.Var
 import eartraining._
 
-trait FlowStatusSelector
-case object InitSelector extends FlowStatusSelector
-case object QuerySelector extends FlowStatusSelector
-case object TriadCoreGenerating extends FlowStatusSelector
-
 trait FlowStatus
 
-object Flow {
+class Flow {
 
-  val status = Var[FlowStatus](Init)
+  val state = Var[FlowStatus](new Init)
 
-  var audioEngineOption: Option[AudioEngine] = None
+  private var audioEngineOption: Option[AudioEngine] = None
 
-  def goToStatus(nextStatus: FlowStatusSelector): Unit = {
-    nextStatus match {
-      case InitSelector =>
-        status := Init
-      case QuerySelector =>
-        status := Query(audioEngineOption.get)
-    }
+  def initWithAudioEngine(audioEngine: AudioEngine): Unit = {
+    audioEngineOption = Some(audioEngine)
+    state := new Menu(this)
+  }
+
+  def toQueryState(): Unit = {
+    state := new Query(audioEngineOption.get, this)
+  }
+
+  def toTrichordGenerator()= {
+    state := new TrichordGenerator(audioEngineOption.get, this)
+  }
+
+  def back() = {
+    state := new Menu(this)
   }
 
 }

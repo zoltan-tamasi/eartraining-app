@@ -58,17 +58,27 @@ case object A extends NoteName
 case object A_# extends NoteName
 case object B extends NoteName
 
+object NoteName {
+  def fromString(string: String): NoteName = List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B).find { _.toString == string } get
+}
+
 sealed trait Rotation
 
 case object Rotation0 extends Rotation
 case object Rotation1 extends Rotation
 case object Rotation2 extends Rotation
 
+object Rotation {
+  def fromString(string: String): Rotation = List(Rotation0, Rotation1, Rotation2).find { _.toString == string } get
+}
+
 sealed trait OctaveExplode
 case object OctaveExploded extends OctaveExplode
 case object NotOctaveExploded extends OctaveExplode
 
-case class Chord(core: TriadCore, rotation: Rotation, octaveExplode: OctaveExplode, baseNote: Note)
+case class Chord(core: TriadCore, rotation: Rotation, octaveExplode: OctaveExplode, baseNote: Note) {
+  override def toString: String = s"(" + Chord.notesOf(this).mkString(",") + ")"
+}
 
 object Chord {
   def notesOf(chord: Chord): List[Note] = {
@@ -129,6 +139,8 @@ case object Major extends TriadCore(4, 3, 5)
 case object Augmented extends TriadCore(4, 4, 4)
 
 object TriadCore {
-  def allTriadTypes = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3, Stacked4s, StackedMinor2,
+  def fromString(string: String): TriadCore = allTriadTypes.find { _.toString == string } get
+
+  def allTriadTypes: List[TriadCore] = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3, Stacked4s, StackedMinor2,
     Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor, MinorMajorI, Lyd, Locr, LydSus2, AugSus2)
 }
