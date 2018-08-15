@@ -1,6 +1,15 @@
 package eartraining
 
 case class Note(noteName: NoteName, octave: Int) {
+
+  def <= (that: Note) = Note.lessThanOrEqual(this, that)
+
+  def >= (that: Note) = Note.lessThanOrEqual(that, this)
+
+  def ++ () = Note.successor(this)
+
+  def -- () = Note.predecessor(this)
+
   override def toString: String = {
     val noteNameString = this.noteName match {
       case C => "C"
@@ -22,6 +31,28 @@ case class Note(noteName: NoteName, octave: Int) {
 
 object Note {
 
+  def lessThanOrEqual(note1: Note, note2: Note): Boolean = {
+    Note.asInt(note1) <= Note.asInt(note2)
+  }
+
+  def asInt(note: Note): Int = {
+    val noteValue = note.noteName match {
+      case C => 0
+      case C_# => 1
+      case D => 2
+      case D_# => 3
+      case E => 4
+      case F => 5
+      case F_# => 6
+      case G => 7
+      case G_# => 8
+      case A => 9
+      case A_# => 10
+      case B => 11
+    }
+    noteValue + (note.octave * 12)
+  }
+
   def add(note: Note, toAdd: Int): Note = {
     Function.chain(List.fill(toAdd)(successor _))(note)
   }
@@ -41,6 +72,22 @@ object Note {
     case B => Note(C, note.octave + 1)
   }
 
+  def predecessor(note: Note): Note = note.noteName match {
+    case C => Note(B, note.octave - 1)
+    case C_# => Note(C, note.octave)
+    case D => Note(C_#, note.octave)
+    case D_# => Note(D, note.octave)
+    case E => Note(D_#, note.octave)
+    case F => Note(E, note.octave)
+    case F_# => Note(F, note.octave)
+    case G => Note(F_#, note.octave)
+    case G_# => Note(G, note.octave)
+    case A => Note(G_#, note.octave)
+    case A_# => Note(A, note.octave)
+    case B => Note(A_#, note.octave)
+  }
+
+
 }
 
 sealed trait NoteName
@@ -59,7 +106,8 @@ case object A_# extends NoteName
 case object B extends NoteName
 
 object NoteName {
-  def fromString(string: String): NoteName = List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B).find { _.toString == string } get
+  def fromString(string: String): NoteName =
+    List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B).find { _.toString == string }.get
 }
 
 sealed trait Rotation
@@ -69,7 +117,8 @@ case object Rotation1 extends Rotation
 case object Rotation2 extends Rotation
 
 object Rotation {
-  def fromString(string: String): Rotation = List(Rotation0, Rotation1, Rotation2).find { _.toString == string } get
+  def fromString(string: String): Rotation =
+    List(Rotation0, Rotation1, Rotation2).find { _.toString == string }.get
 }
 
 sealed trait OctaveExplode
@@ -114,7 +163,7 @@ object Chord {
   }
 }
 
-sealed class TriadCore(val intervals: (Int, Int, Int)) {
+sealed abstract class TriadCore(val intervals: (Int, Int, Int)) {
   assert(intervals._1 + intervals._2 + intervals._3 == 12, "TriadCore must be 3 integers summing up to 12")
 }
 
@@ -139,8 +188,9 @@ case object Major extends TriadCore(4, 3, 5)
 case object Augmented extends TriadCore(4, 4, 4)
 
 object TriadCore {
-  def fromString(string: String): TriadCore = allTriadTypes.find { _.toString == string } get
+  def fromString(string: String): TriadCore = allTriadTypes.find { _.toString == string }.get
 
-  def allTriadTypes: List[TriadCore] = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3, Stacked4s, StackedMinor2,
-    Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor, MinorMajorI, Lyd, Locr, LydSus2, AugSus2)
+  def allTriadTypes: List[TriadCore] = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3,
+    Stacked4s, StackedMinor2, Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor,
+    MinorMajorI, Lyd, Locr, LydSus2, AugSus2)
 }
