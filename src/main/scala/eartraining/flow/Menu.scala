@@ -1,13 +1,9 @@
 package eartraining.flow
 
-class Menu(val parent: Flow) extends FlowStatus {
+import eartraining.{AudioEngine}
 
-  def toQueryState(): Unit = {
-    parent.toQueryState()
-  }
+sealed trait MenuAction
+case object ToQuery extends MenuAction
+case object ToTrichordGenerator extends MenuAction
 
-  def toTrichordGenerator() = {
-    parent.toTrichordGenerator()
-  }
-
-}
+case class Menu(audioEngine: AudioEngine) extends FlowStatus

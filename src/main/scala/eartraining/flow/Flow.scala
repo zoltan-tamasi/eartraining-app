@@ -7,7 +7,7 @@ trait FlowStatus
 
 class Flow {
 
-  val state = Var[FlowStatus](new Init)
+  val state = Var[FlowStatus](Init)
 
   private var audioEngineOption: Option[AudioEngine] = None
 

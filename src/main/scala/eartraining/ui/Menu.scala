@@ -10,11 +10,11 @@ object MenuUI extends StateToUI[Menu] {
   def toUI(menu: Menu): Binding[Node] = {
     <div>
       <hr/>
-      <button onclick={(_: Event) => menu.toQueryState()}>
+      <button onclick={(_: Event) => menu.dispatchEvent(ToQuery)}>
         Practice hearing trichords
       </button>
 
-      <button onclick={(_: Event) => menu.toTrichordGenerator()}>
+      <button onclick={(_: Event) => menu.dispatchEvent(ToTrichordGenerator)}>
         Trichord generator
       </button>
     </div>

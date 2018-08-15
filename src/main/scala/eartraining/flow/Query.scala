@@ -10,15 +10,20 @@ case object NotGuessed extends GuessStatus
 case object GuessedWrong extends GuessStatus
 case object GuessedCorrectly extends GuessStatus
 
+sealed trait QueryAction
+case object Next extends QueryAction
+case class DoGuess(triadCore: TriadCore) extends QueryAction
+case class PlayChord(chord: Chord) extends QueryAction
+
 case class QueryState(guessed: Var[GuessStatus],
                       rotationsEnabled: Var[Boolean],
                       octaveExplodeEnabled: Var[Boolean],
                       actualChord: Var[Chord],
                       selectedTriadCoreSet: Var[Set[TriadCore]])
 
-class Query(val audioEngine: AudioEngine, val parent: Flow) extends FlowStatus {
+case class Query(val audioEngine: AudioEngine) extends FlowStatus {
 
-  val state = QueryState(
+  val stateContainer = QueryState(
     guessed = Var(NotGuessed),
     rotationsEnabled = Var(true),
     octaveExplodeEnabled = Var(true),
@@ -58,22 +63,27 @@ class Query(val audioEngine: AudioEngine, val parent: Flow) extends FlowStatus {
 
   private def pullRandom[T](list: Seq[T]): T = list(Random.nextInt(list.length))
 
-  def next() = {
-    val newChord = createRandomChordFromTriadCore(pullRandom(state.selectedTriadCoreSet.get.toList), state.octaveExplodeEnabled.get, state.rotationsEnabled.get)
-    audioEngine.playChord(newChord)
-    state.actualChord := newChord
-  }
+  def handleAction(action: QueryAction): Query = {
+    action match {
+      case Next =>
+        val newChord = createRandomChordFromTriadCore(
+          pullRandom(stateContainer.selectedTriadCoreSet.get.toList),
+          stateContainer.octaveExplodeEnabled.get,
+          stateContainer.rotationsEnabled.get)
+        audioEngine.playChord(newChord)
+        stateContainer.actualChord := newChord
+        stateContainer.guessed := NotGuessed
+        this
 
-  def doGuess(triadCore: TriadCore): Unit = {
-    state.guessed := (if (triadCore == state.actualChord.get.core) GuessedCorrectly else GuessedWrong)
-  }
+      case DoGuess(triadCore: TriadCore) =>
+        stateContainer.guessed := (if (triadCore == stateContainer.actualChord.get.core) GuessedCorrectly else GuessedWrong)
+        this
 
-  def playChord(chord: Chord): Unit = {
-    audioEngine.playChord(chord)
-  }
 
-  def back() = {
-    parent.back()
+      case PlayChord(chord: Chord) =>
+        audioEngine.playChord(chord)
+        this
+    }
   }
 
 }

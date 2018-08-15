@@ -19,12 +19,12 @@ object QueryUI extends StateToUI[Query] {
         }
       </button>
       <input type="checkbox"
-             checked={ query.state.selectedTriadCoreSet.bind.contains(triadCore) }
+             checked={ query.stateContainer.selectedTriadCoreSet.bind.contains(triadCore) }
              onchange={ (event: Event) =>
                if (event.target.asInstanceOf[HTMLInputElement].checked) {
-                 query.state.selectedTriadCoreSet := query.state.selectedTriadCoreSet.get + triadCore
+                 query.stateContainer.selectedTriadCoreSet := query.stateContainer.selectedTriadCoreSet.get + triadCore
                } else {
-                 query.state.selectedTriadCoreSet := query.state.selectedTriadCoreSet.get - triadCore
+                 query.stateContainer.selectedTriadCoreSet := query.stateContainer.selectedTriadCoreSet.get - triadCore
                }
              }>
       </input>
@@ -79,29 +79,29 @@ object QueryUI extends StateToUI[Query] {
 
       Rotations
       <input type="checkbox"
-             checked={query.state.rotationsEnabled.bind}
+             checked={query.stateContainer.rotationsEnabled.bind}
              onchange={(event: Event) =>
                if (event.target.asInstanceOf[HTMLInputElement].checked) {
-                 query.state.rotationsEnabled := true
+                 query.stateContainer.rotationsEnabled := true
                } else {
-                 query.state.rotationsEnabled := false
+                 query.stateContainer.rotationsEnabled := false
                }}>
       </input>
 
       Octave extraction
       <input type="checkbox"
-             checked={query.state.octaveExplodeEnabled.bind}
+             checked={query.stateContainer.octaveExplodeEnabled.bind}
              onchange={(event: Event) =>
                if (event.target.asInstanceOf[HTMLInputElement].checked) {
-                 query.state.octaveExplodeEnabled := true
+                 query.stateContainer.octaveExplodeEnabled := true
                } else {
-                 query.state.octaveExplodeEnabled := false
+                 query.stateContainer.octaveExplodeEnabled := false
                }}>
       </input>
 
       <hr/>
 
-      <button onclick={(_: Event) => query.playChord(query.state.actualChord.get)}>
+      <button onclick={(_: Event) => query.playChord(query.stateContainer.actualChord.get)}>
         Play Chord
       </button>
 
@@ -111,7 +111,7 @@ object QueryUI extends StateToUI[Query] {
 
       <hr/>
       {
-        query.state.guessed.bind match {
+        query.stateContainer.guessed.bind match {
           case GuessedCorrectly => <span style="color: green">Correct</span>
           case GuessedWrong => <span style="color: red">Incorrect</span>
           case NotGuessed => <span></span>
