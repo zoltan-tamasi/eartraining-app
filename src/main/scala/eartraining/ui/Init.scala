@@ -1,7 +1,7 @@
 package eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
-import eartraining.flow.Init
+import eartraining.state.Init
 import org.scalajs.dom.Node
 
 object InitUI extends StateToUI[Init] {

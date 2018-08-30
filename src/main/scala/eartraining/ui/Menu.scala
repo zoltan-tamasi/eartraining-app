@@ -1,7 +1,7 @@
 package eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
-import eartraining.flow._
+import eartraining.state._
 import org.scalajs.dom.{Event, Node}
 
 object MenuUI extends StateToUI[Menu] {
@@ -10,11 +10,11 @@ object MenuUI extends StateToUI[Menu] {
   def toUI(menu: Menu): Binding[Node] = {
     <div>
       <hr/>
-      <button onclick={(_: Event) => menu.dispatchEvent(ToQuery)}>
+      <button onclick={(_: Event) => menu.handleAction(ToQuery)}>
         Practice hearing trichords
       </button>
 
-      <button onclick={(_: Event) => menu.dispatchEvent(ToTrichordGenerator)}>
+      <button onclick={(_: Event) => menu.handleAction(ToTrichordGenerator)}>
         Trichord generator
       </button>
     </div>

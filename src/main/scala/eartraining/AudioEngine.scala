@@ -51,7 +51,7 @@ object AudioEngine {
     source.start(0)
   }
 
-  def create(context: AudioContext): Future[AudioEngine] = {
+  def createWithAudioContext(context: AudioContext): Future[AudioEngine] = {
 
     def loadSound(url: String): Future[AudioBuffer] = {
       val p = Promise[AudioBuffer]()

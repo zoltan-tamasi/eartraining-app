@@ -1,8 +1,8 @@
-package eartraining.flow
+package eartraining.state
 
 import eartraining.AudioEngine
 
 sealed trait InitAction
 case class Initialized(audioEngine: AudioEngine) extends InitAction
 
-case object Init extends FlowStatus
+case class Init() extends RootOption

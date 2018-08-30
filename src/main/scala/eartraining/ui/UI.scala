@@ -2,7 +2,7 @@ package eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
 import eartraining._
-import eartraining.flow._
+import eartraining.state._
 import org.scalajs.dom.Node
 
 trait Labeler[A] {
@@ -48,8 +48,8 @@ trait StateToUI[A] {
 
 object UI {
   @dom
-  def apply(flow: Flow): Binding[Node] = {
-    flow.state.bind match {
+  def apply(flow: Root): Binding[Node] = {
+    flow.stateContainer.rootState.bind match {
       case status: Init => { InitUI.toUI(status).bind }
       case status: Query => { QueryUI.toUI(status).bind }
       case status: Menu => { MenuUI.toUI(status).bind }

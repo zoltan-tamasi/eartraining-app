@@ -3,7 +3,7 @@ package eartraining.ui
 import com.thoughtworks.binding.Binding.Constants
 import com.thoughtworks.binding.{Binding, dom}
 import eartraining._
-import eartraining.flow._
+import eartraining.state._
 import org.scalajs.dom.{Event, Node}
 import org.scalajs.dom.raw.{HTMLInputElement, HTMLSelectElement}
 
@@ -84,16 +84,16 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
 
       <hr/>
 
-      <button onclick={(_: Event) => trichordGenerator.playChord()}>
+      <button onclick={(_: Event) => trichordGenerator.handleAction(PlayCurrentChord) }>
         Play Chord
       </button>
-      <button onclick={(_: Event) => trichordGenerator.randomize()}>
+      <button onclick={(_: Event) => trichordGenerator.handleAction(Randomize) }>
         Randomize
       </button>
 
       <hr/>
 
-      <button onclick={(_: Event) => trichordGenerator.back()}>
+      <button onclick={(_: Event) => trichordGenerator.handleAction(BackToMenu)}>
         Back
       </button>
 

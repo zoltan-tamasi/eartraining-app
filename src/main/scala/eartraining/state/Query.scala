@@ -1,4 +1,4 @@
-package eartraining.flow
+package eartraining.state
 
 import com.thoughtworks.binding.Binding.Var
 import eartraining._
@@ -10,10 +10,9 @@ case object NotGuessed extends GuessStatus
 case object GuessedWrong extends GuessStatus
 case object GuessedCorrectly extends GuessStatus
 
-sealed trait QueryAction
+sealed trait QueryAction extends RootAction
 case object Next extends QueryAction
 case class DoGuess(triadCore: TriadCore) extends QueryAction
-case class PlayChord(chord: Chord) extends QueryAction
 
 case class QueryState(guessed: Var[GuessStatus],
                       rotationsEnabled: Var[Boolean],
@@ -21,7 +20,7 @@ case class QueryState(guessed: Var[GuessStatus],
                       actualChord: Var[Chord],
                       selectedTriadCoreSet: Var[Set[TriadCore]])
 
-case class Query(val audioEngine: AudioEngine) extends FlowStatus {
+case class Query(delegator: RootAction => Root) extends RootOption {
 
   val stateContainer = QueryState(
     guessed = Var(NotGuessed),
@@ -63,14 +62,14 @@ case class Query(val audioEngine: AudioEngine) extends FlowStatus {
 
   private def pullRandom[T](list: Seq[T]): T = list(Random.nextInt(list.length))
 
-  def handleAction(action: QueryAction): Query = {
+  def handleAction(action: RootAction): Query = {
     action match {
       case Next =>
         val newChord = createRandomChordFromTriadCore(
           pullRandom(stateContainer.selectedTriadCoreSet.get.toList),
           stateContainer.octaveExplodeEnabled.get,
           stateContainer.rotationsEnabled.get)
-        audioEngine.playChord(newChord)
+        delegator(PlayChord(newChord))
         stateContainer.actualChord := newChord
         stateContainer.guessed := NotGuessed
         this
@@ -79,9 +78,8 @@ case class Query(val audioEngine: AudioEngine) extends FlowStatus {
         stateContainer.guessed := (if (triadCore == stateContainer.actualChord.get.core) GuessedCorrectly else GuessedWrong)
         this
 
-
       case PlayChord(chord: Chord) =>
-        audioEngine.playChord(chord)
+        delegator(PlayChord(chord))
         this
     }
   }

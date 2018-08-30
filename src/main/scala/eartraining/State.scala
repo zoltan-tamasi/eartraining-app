@@ -1,13 +1,13 @@
 package eartraining
 
-import eartraining.flow.{ToQuery, _}
+/*import eartraining.state.{ToQuery, _}
 
 class StateMapper {
 
-  def mapState(state: FlowStatus, action: Any): FlowStatus = {
+  def mapState(state: RootState, action: Any): RootState = {
 
     (state, action) match {
-      case (Init, Initialized(audioEngine)) => Menu(audioEngine)
+      case (Init(), Initialized(audioEngine)) => Menu(audioEngine)
 
       case (Menu(audioEngine), ToQuery) => Query(audioEngine)
       case (Menu(audioEngine), ToTrichordGenerator) => TrichordGenerator(audioEngine)
@@ -19,5 +19,5 @@ class StateMapper {
 
   }
 
-}
+}*/
 

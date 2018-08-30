@@ -2,7 +2,7 @@ package eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
 import eartraining._
-import eartraining.flow._
+import eartraining.state._
 import org.scalajs.dom.{Event, Node}
 import org.scalajs.dom.raw.HTMLInputElement
 
@@ -13,7 +13,7 @@ object QueryUI extends StateToUI[Query] {
   @dom
   def triadCoreSelection(triadCore: TriadCore, query: Query): Binding[Node] = {
     <td>
-      <button onclick = { (_ : Event) => query.doGuess(triadCore) }>
+      <button onclick = { (_ : Event) => query.handleAction(DoGuess(triadCore)) }>
         {
         triadCore.label
         }
@@ -101,11 +101,11 @@ object QueryUI extends StateToUI[Query] {
 
       <hr/>
 
-      <button onclick={(_: Event) => query.playChord(query.stateContainer.actualChord.get)}>
+      <button onclick={(_: Event) => query.handleAction(PlayChord(query.stateContainer.actualChord.get)) }>
         Play Chord
       </button>
 
-      <button onclick={(_: Event) => query.next()}>
+      <button onclick={(_: Event) => query.handleAction(Next) }>
         Next
       </button>
 
@@ -119,7 +119,7 @@ object QueryUI extends StateToUI[Query] {
       }
       <hr/>
 
-      <button onclick={(_: Event) => query.back()}>
+      <button onclick={(_: Event) => query.handleAction(BackToMenuSelected) }>
         Back
       </button>
 
