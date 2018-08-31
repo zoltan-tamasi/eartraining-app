@@ -14,18 +14,12 @@ object QueryUI extends StateToUI[Query] {
   def triadCoreSelection(triadCore: TriadCore, query: Query): Binding[Node] = {
     <td>
       <button onclick = { (_ : Event) => query.handleAction(DoGuess(triadCore)) }>
-        {
-        triadCore.label
-        }
+        { triadCore.label }
       </button>
       <input type="checkbox"
              checked={ query.stateContainer.selectedTriadCoreSet.bind.contains(triadCore) }
-             onchange={ (event: Event) =>
-               if (event.target.asInstanceOf[HTMLInputElement].checked) {
-                 query.stateContainer.selectedTriadCoreSet := query.stateContainer.selectedTriadCoreSet.get + triadCore
-               } else {
-                 query.stateContainer.selectedTriadCoreSet := query.stateContainer.selectedTriadCoreSet.get - triadCore
-               }
+             onchange={(event: Event) =>
+               query.handleAction(ChangeTriadCoreSelection(triadCore, event.target.asInstanceOf[HTMLInputElement].checked))
              }>
       </input>
     </td>
@@ -81,22 +75,16 @@ object QueryUI extends StateToUI[Query] {
       <input type="checkbox"
              checked={query.stateContainer.rotationsEnabled.bind}
              onchange={(event: Event) =>
-               if (event.target.asInstanceOf[HTMLInputElement].checked) {
-                 query.stateContainer.rotationsEnabled := true
-               } else {
-                 query.stateContainer.rotationsEnabled := false
-               }}>
+               query.handleAction(ChangeRotationSelection(event.target.asInstanceOf[HTMLInputElement].checked))
+             }>
       </input>
 
       Octave extraction
       <input type="checkbox"
              checked={query.stateContainer.octaveExplodeEnabled.bind}
              onchange={(event: Event) =>
-               if (event.target.asInstanceOf[HTMLInputElement].checked) {
-                 query.stateContainer.octaveExplodeEnabled := true
-               } else {
-                 query.stateContainer.octaveExplodeEnabled := false
-               }}>
+               query.handleAction(ChangeOctaveExtractionSelection(event.target.asInstanceOf[HTMLInputElement].checked))
+             }>
       </input>
 
       <hr/>
@@ -119,7 +107,7 @@ object QueryUI extends StateToUI[Query] {
       }
       <hr/>
 
-      <button onclick={(_: Event) => query.handleAction(BackToMenuSelected) }>
+      <button onclick={(_: Event) => query.handleAction(BackToMenu) }>
         Back
       </button>
 

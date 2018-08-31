@@ -9,7 +9,6 @@ trait RootAction
 case class AudioEngineInitialized(audioEngine: AudioEngine) extends RootAction
 case object QueryOptionSelected extends RootAction
 case object TrichordGeneratorOptionSelected extends RootAction
-case object BackToMenuSelected extends RootAction
 case class PlayChord(chord: Chord) extends RootAction
 
 case class RootState(rootState: Var[RootOption], var audioEngine: Option[AudioEngine])
@@ -30,7 +29,7 @@ case class Root() {
       case (TrichordGeneratorOptionSelected, RootState(_, _)) =>
         stateContainer.rootState := TrichordGenerator(handleAction)
         this
-      case (BackToMenuSelected, RootState(_, _)) =>
+      case (BackToMenu, RootState(_, _)) =>
         stateContainer.rootState := Menu(handleAction)
         this
       case (PlayChord(chord), RootState(_, Some(audioEngine))) =>

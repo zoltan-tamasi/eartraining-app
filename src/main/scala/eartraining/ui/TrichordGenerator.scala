@@ -16,7 +16,8 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
       Rotations
       <select onchange={(event: Event) =>
         val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value
-        trichordGenerator.state.rotation := Rotation.fromString(selectedValue) }>
+        trichordGenerator.handleAction(ChangeRotation(Rotation.fromString(selectedValue)))
+      }>
         <option value={Rotation0.toString} selected={ trichordGenerator.state.rotation.bind == Rotation0 }>1st position</option>
         <option value={Rotation1.toString} selected={ trichordGenerator.state.rotation.bind == Rotation1 }>2nd position</option>
         <option value={Rotation2.toString} selected={ trichordGenerator.state.rotation.bind == Rotation2 }>3rd position</option>
@@ -26,17 +27,17 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
       <input type="checkbox"
              checked={trichordGenerator.state.octaveExplode.bind == OctaveExploded}
              onchange={(event: Event) =>
-               if (event.target.asInstanceOf[HTMLInputElement].checked) {
-                 trichordGenerator.state.octaveExplode := OctaveExploded
-               } else {
-                 trichordGenerator.state.octaveExplode := NotOctaveExploded
-               }}>
+               trichordGenerator.handleAction(
+                 ChangeOctaveExploded(OctaveExplode.fromBoolean(event.target.asInstanceOf[HTMLInputElement].checked))
+               )
+             }>
       </input>
 
       Triad core
       <select onchange={(event: Event) =>
         val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value
-        trichordGenerator.state.triadCore := TriadCore.fromString(selectedValue) }>
+        trichordGenerator.handleAction(ChangeTriadCore(TriadCore.fromString(selectedValue)))
+      }>
         {
           Constants(TriadCore.allTriadTypes: _*) map { triadCore =>
             <option selected={ trichordGenerator.state.triadCore.bind == triadCore } value={triadCore.toString}>
@@ -49,7 +50,8 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
       Base note
       <select onchange={(event: Event) =>
         val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value
-        trichordGenerator.state.baseNote := Note(NoteName.fromString(selectedValue), trichordGenerator.state.baseNote.get.octave) }>
+        trichordGenerator.handleAction(ChangeBaseNote(NoteName.fromString(selectedValue)))
+      }>
         {
           Constants(List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B): _*) map { note =>
             <option selected={trichordGenerator.state.baseNote.bind.noteName == note} value={note.toString}>
@@ -62,7 +64,8 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
       Octave
       <select onchange={(event: Event) =>
         val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value
-        trichordGenerator.state.baseNote := Note(trichordGenerator.state.baseNote.get.noteName, selectedValue.toInt) }>
+        trichordGenerator.handleAction(ChangeOctave(selectedValue.toInt))
+      }>
         {
           Constants(List(2, 3, 4): _*) map { octave =>
             <option selected={trichordGenerator.state.baseNote.bind.octave == octave} value={octave.toString}>

@@ -54,7 +54,7 @@ object Note {
   }
 
   def add(note: Note, toAdd: Int): Note = {
-    Function.chain(List.fill(toAdd)(successor _))(note)
+                                                                                    Function.chain(List.fill(toAdd)(successor _))(note)
   }
 
   def successor(note: Note): Note = note.noteName match {
@@ -124,6 +124,10 @@ object Rotation {
 sealed trait OctaveExplode
 case object OctaveExploded extends OctaveExplode
 case object NotOctaveExploded extends OctaveExplode
+
+object OctaveExplode {
+  def fromBoolean(enabled: Boolean): OctaveExplode = if (enabled) OctaveExploded else NotOctaveExploded
+}
 
 case class Chord(core: TriadCore, rotation: Rotation, octaveExplode: OctaveExplode, baseNote: Note) {
   override def toString: String = s"(" + Chord.notesOf(this).mkString(",") + ")"

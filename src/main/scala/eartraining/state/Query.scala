@@ -13,6 +13,9 @@ case object GuessedCorrectly extends GuessStatus
 sealed trait QueryAction extends RootAction
 case object Next extends QueryAction
 case class DoGuess(triadCore: TriadCore) extends QueryAction
+case class ChangeTriadCoreSelection(triadCore: TriadCore, enabled: Boolean) extends QueryAction
+case class ChangeRotationSelection(enabled: Boolean) extends QueryAction
+case class ChangeOctaveExtractionSelection(enabled: Boolean) extends QueryAction
 
 case class QueryState(guessed: Var[GuessStatus],
                       rotationsEnabled: Var[Boolean],
@@ -78,8 +81,24 @@ case class Query(delegator: RootAction => Root) extends RootOption {
         stateContainer.guessed := (if (triadCore == stateContainer.actualChord.get.core) GuessedCorrectly else GuessedWrong)
         this
 
-      case PlayChord(chord: Chord) =>
-        delegator(PlayChord(chord))
+      case ChangeTriadCoreSelection(triadCore: TriadCore, enabled: Boolean) =>
+        if (enabled) {
+          stateContainer.selectedTriadCoreSet := stateContainer.selectedTriadCoreSet.get + triadCore
+        } else {
+          stateContainer.selectedTriadCoreSet := stateContainer.selectedTriadCoreSet.get - triadCore
+        }
+        this
+
+      case ChangeRotationSelection(enabled: Boolean) =>
+        stateContainer.rotationsEnabled := enabled
+        this
+
+      case ChangeOctaveExtractionSelection(enabled: Boolean) =>
+        stateContainer.octaveExplodeEnabled := enabled
+        this
+
+      case action: RootAction =>
+        delegator(action)
         this
     }
   }
