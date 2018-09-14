@@ -9,6 +9,11 @@ trait Labeler[A] {
   def label(in : A): String
 }
 
+trait GetImage[A] {
+  def getImage(in : A): String
+}
+
+
 trait StateToUI[A] {
 
   implicit object TriadCoreLabeler extends Labeler[TriadCore] {
@@ -37,9 +42,38 @@ trait StateToUI[A] {
     }
   }
 
+  implicit object TriadCoreImage extends GetImage[TriadCore] {
+    override def getImage(in: TriadCore): String = {
+      in match {
+        case StackedMinor2 => "1-1-10.png"
+        case Minor2PlusMajor2 => "1-2-9.png"
+        case Major2PlusMinor2 => "1-9-2.png"
+        case MinorMajor => "1-3-8.png"
+        case MinorMajorI => "1-8-3.png"
+        case Lyd => "1-5-6.png"
+        case Locr => "1-6-5.png"
+        case Minor7Plus6 => "2-2-8.png"
+        case Minor7With3 => "2-3-7.png"
+        case Minor7With5 => "2-7-3.png"
+        case LydSus2 => "2-4-6.png"
+        case AugSus2 => "2-6-4.png"
+        case Minor => "3-4-5.png"
+        case Major => "3-5-4.png"
+        case Augmented => "4-4-4.png"
+        case Diminished => "3-3-6.png"
+        case Major7Without5 => "1-7-4.png"
+        case Major7Without3 => "1-4-7.png"
+        case Stacked4s => "2-5-5.png"
+      }
+    }
+  }
+
   implicit class LabelerOps[T](data: T) {
     def label(implicit labeler: Labeler[T]) =
       labeler.label(data)
+
+    def getImage(implicit imageGetter: GetImage[T]) =
+      imageGetter.getImage(data)
   }
 
   def toUI(in : A): Binding[Node]

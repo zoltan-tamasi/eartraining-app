@@ -10,23 +10,8 @@ case class Note(noteName: NoteName, octave: Int) {
 
   def -- () = Note.predecessor(this)
 
-  override def toString: String = {
-    val noteNameString = this.noteName match {
-      case C => "C"
-      case C_# => "C#"
-      case D => "D"
-      case D_# => "D#"
-      case E => "E"
-      case F => "F"
-      case F_# => "F#"
-      case G => "G"
-      case G_# => "G#"
-      case A => "A"
-      case A_# => "A#"
-      case B => "B"
-    }
-    s"${noteNameString}$octave"
-  }
+  override def toString: String = s"${NoteName.toString(noteName)}$octave"
+
 }
 
 object Note {
@@ -54,39 +39,18 @@ object Note {
   }
 
   def add(note: Note, toAdd: Int): Note = {
-                                                                                    Function.chain(List.fill(toAdd)(successor _))(note)
+    Function.chain(List.fill(toAdd)(successor _))(note)
   }
 
-  def successor(note: Note): Note = note.noteName match {
-    case C => Note(C_#, note.octave)
-    case C_# => Note(D, note.octave)
-    case D => Note(D_#, note.octave)
-    case D_# => Note(E, note.octave)
-    case E => Note(F, note.octave)
-    case F => Note(F_#, note.octave)
-    case F_# => Note(G, note.octave)
-    case G => Note(G_#, note.octave)
-    case G_# => Note(A, note.octave)
-    case A => Note(A_#, note.octave)
-    case A_# => Note(B, note.octave)
-    case B => Note(C, note.octave + 1)
+  def successor(note: Note): Note = note match {
+    case Note(B, octave) => Note(C, octave + 1)
+    case Note(noteName, octave) => Note(NoteName.successor(noteName), octave)
   }
 
-  def predecessor(note: Note): Note = note.noteName match {
-    case C => Note(B, note.octave - 1)
-    case C_# => Note(C, note.octave)
-    case D => Note(C_#, note.octave)
-    case D_# => Note(D, note.octave)
-    case E => Note(D_#, note.octave)
-    case F => Note(E, note.octave)
-    case F_# => Note(F, note.octave)
-    case G => Note(F_#, note.octave)
-    case G_# => Note(G, note.octave)
-    case A => Note(G_#, note.octave)
-    case A_# => Note(A, note.octave)
-    case B => Note(A_#, note.octave)
+  def predecessor(note: Note): Note = note match {
+    case Note(C, octave) => Note(B, octave - 1)
+    case Note(noteName, octave) => Note(NoteName.predecessor(noteName), octave)
   }
-
 
 }
 
@@ -106,8 +70,60 @@ case object A_# extends NoteName
 case object B extends NoteName
 
 object NoteName {
+
+  def toString(noteName: NoteName): String = {
+    noteName match {
+      case C => "C"
+      case C_# => "C#"
+      case D => "D"
+      case D_# => "D#"
+      case E => "E"
+      case F => "F"
+      case F_# => "F#"
+      case G => "G"
+      case G_# => "G#"
+      case A => "A"
+      case A_# => "A#"
+      case B => "B"
+    }
+  }
+
   def fromString(string: String): NoteName =
     List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B).find { _.toString == string }.get
+
+  def add(noteName: NoteName, toAdd: Int): NoteName = {
+    Function.chain(List.fill(toAdd)(successor _))(noteName)
+  }
+
+  def successor(noteName: NoteName): NoteName = noteName match {
+    case C => C_#
+    case C_# => D
+    case D => D_#
+    case D_# => E
+    case E => F
+    case F => F_#
+    case F_# => G
+    case G => G_#
+    case G_# => A
+    case A => A_#
+    case A_# => B
+    case B => C
+  }
+
+  def predecessor(noteName: NoteName): NoteName = noteName match {
+    case C => B
+    case C_# => C
+    case D => C_#
+    case D_# => D
+    case E => D_#
+    case F => E
+    case F_# => F
+    case G => F_#
+    case G_# => G
+    case A => G_#
+    case A_# => A
+    case B => A_#
+  }
 }
 
 sealed trait Rotation

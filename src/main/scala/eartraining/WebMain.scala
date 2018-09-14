@@ -14,7 +14,7 @@ object WebApp {
 
   def main(args: Array[String]): Unit = {
     val flow = new Root
-    dom.render(document.body, UI(flow))
+    dom.render(document.getElementById("main"), UI(flow))
     AudioEngine.createWithAudioContext(new AudioContext())
       .onComplete {
         case Success(audioEngine) =>
