@@ -10,14 +10,13 @@ import org.scalajs.dom.raw.{HTMLInputElement, HTMLSelectElement}
 object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
 
   private def getImageAndRotation(triadCore: TriadCore, rotation: Rotation): (String, String) = {
-    val image = triadCore.getImage
     val imageRotation = rotation match {
       case Rotation0 => 0
-      case Rotation1 => triadCore.intervals._1 * 30
-      case Rotation2 => (triadCore.intervals._1 + triadCore.intervals._2) * 30
+      case Rotation1 => triadCore.intervals._1 * -30
+      case Rotation2 => (triadCore.intervals._1 + triadCore.intervals._2) * -30
     }
 
-    (image, s"transform: rotate(${imageRotation}deg)")
+    (triadCore.getImage, s"transform: rotate(${imageRotation}deg)")
   }
 
   private def getNoteWheel(triadCore: TriadCore, rotation: Rotation, octaveExplode: OctaveExplode, baseNote: Note): List[(NoteName, Int, Boolean)] = {

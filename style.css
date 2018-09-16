@@ -4,8 +4,14 @@
     padding: 60px;
 }
 
+#note-wheel img {
+    width: 200px;
+    height: 200px;
+}
+
 .note-label {
   color: #b6b4b4;
+  position: absolute;
 }
 
 .note-label.selected {
@@ -15,84 +21,60 @@
 
 .note-label.pos-0 {
     top: 0px;
-    position: absolute;
     left: 150px;
-    z-index: 2;
 }
 
 .note-label.pos-1 {
     top: 25px;
-    position: absolute;
     left: 210px;
-    z-index: 2;
 }
 
 .note-label.pos-2 {
     top: 65px;
-    position: absolute;
     left: 260px;
-    z-index: 2;
 }
 
 .note-label.pos-3 {
     top: 140px;
-    position: absolute;
     left: 270px;
-    z-index: 2;
 }
 
 .note-label.pos-4 {
     top: 205px;
-    position: absolute;
     left: 260px;
-    z-index: 2;
 }
 
 .note-label.pos-5 {
     top: 260px;
-    position: absolute;
     left: 210px;
-    z-index: 2;
 }
 
 .note-label.pos-6 {
     top: 280px;
-    position: absolute;
     left: 150px;
-    z-index: 2;
 }
 
 .note-label.pos-7 {
     top: 260px;
-    position: absolute;
     left: 90px;
-    z-index: 2;
 }
 
 .note-label.pos-8 {
     top: 205px;
-    position: absolute;
     left: 25px;
-    z-index: 2;
 }
 
 .note-label.pos-9 {
     top: 140px;
-    position: absolute;
     left: 20px;
-    z-index: 2;
 }
 
 .note-label.pos-10 {
     top: 65px;
-    position: absolute;
     left: 30px;
-    z-index: 2;
 }
 
 .note-label.pos-11 {
     top: 25px;
-    position: absolute;
     left: 90px;
-    z-index: 2;
 }
