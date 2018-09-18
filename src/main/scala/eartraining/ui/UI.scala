@@ -80,14 +80,43 @@ trait StateToUI[A] {
 
 }
 
-object UI {
+object UI extends StateToUI[Root] {
   @dom
-  def apply(flow: Root): Binding[Node] = {
-    flow.stateContainer.rootState.bind match {
-      case status: Init => { InitUI.toUI(status).bind }
-      case status: Query => { QueryUI.toUI(status).bind }
-      case status: Menu => { MenuUI.toUI(status).bind }
-      case status: TrichordGenerator => { TrichordGeneratorUI.toUI(status).bind }
+  def toUI(root: Root): Binding[Node] = {
+    <div>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Triad cores</a>
+        <button class="navbar-toggler" type="button">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Trichord generator</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    {
+      root.stateContainer.rootState.bind match {
+        case status: Init => {
+          InitUI.toUI(status).bind
+        }
+        case status: Query => {
+          QueryUI.toUI(status).bind
+        }
+        case status: Menu => {
+          MenuUI.toUI(status).bind
+        }
+        case status: TrichordGenerator => {
+          TrichordGeneratorUI.toUI(status).bind
+        }
+      }
     }
+    </div>
   }
 }
