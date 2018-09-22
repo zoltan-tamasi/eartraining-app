@@ -20,7 +20,7 @@ case class TrichordGeneratorState(rotation: Var[Rotation],
                                   triadCore: Var[TriadCore],
                                   baseNote: Var[Note])
 
-case class TrichordGenerator(delegator: RootAction => Root) extends RootOption {
+case class TrichordGenerator(delegator: RootAction => Unit) extends RootOption {
 
   val state = TrichordGeneratorState(
     rotation = Var(Rotation0),
@@ -29,45 +29,37 @@ case class TrichordGenerator(delegator: RootAction => Root) extends RootOption {
     baseNote = Var(Note(C, 3))
   )
 
-  def handleAction(action: RootAction): TrichordGenerator = {
+  def handleAction(action: RootAction): Unit = {
     action match {
       case Randomize =>
-        state.rotation := pullRandom(List(Rotation0, Rotation1, Rotation2))
-        state.octaveExplode := pullRandom(List(OctaveExploded, NotOctaveExploded))
-        state.triadCore := pullRandom(TriadCore.allTriadTypes)
-        state.baseNote := pullRandom(for {
+        state.rotation.value = pullRandom(List(Rotation0, Rotation1, Rotation2))
+        state.octaveExplode.value = pullRandom(List(OctaveExploded, NotOctaveExploded))
+        state.triadCore.value = pullRandom(TriadCore.allTriadTypes)
+        state.baseNote.value = pullRandom(for {
           noteName <- List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#)
           octave <- List(2, 3, 4)
         } yield Note(noteName, octave))
-        this
 
       case ChangeRotation(rotation: Rotation) =>
-        state.rotation := rotation
-        this
+        state.rotation.value = rotation
 
       case ChangeOctaveExploded(enabled: OctaveExplode) =>
-        state.octaveExplode := enabled
-        this
+        state.octaveExplode.value = enabled
 
       case ChangeTriadCore(triadCore: TriadCore) =>
-        state.triadCore := triadCore
-        this
+        state.triadCore.value = triadCore
 
       case ChangeBaseNote(noteName: NoteName) =>
-        state.baseNote := Note(noteName, state.baseNote.get.octave)
-        this
+        state.baseNote.value = Note(noteName, state.baseNote.get.octave)
 
       case ChangeOctave(octave: Int) =>
-        state.baseNote := Note(state.baseNote.get.noteName, octave)
-        this
+        state.baseNote.value = Note(state.baseNote.get.noteName, octave)
 
       case PlayCurrentChord =>
         delegator(PlayChord(Chord(state.triadCore.get, state.rotation.get, state.octaveExplode.get, state.baseNote.get)))
-        this
 
       case action: RootAction =>
         delegator(action)
-        this
     }
   }
 

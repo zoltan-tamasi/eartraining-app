@@ -17,24 +17,27 @@ case class Root() {
 
   val stateContainer: RootState = RootState(Var(Init()), None)
 
-  def handleAction(action: RootAction): Root = {
-    (action, this.stateContainer) match {
-      case (AudioEngineInitialized(audioEngine), RootState(_, None)) =>
+  def handleAction(action: RootAction): Unit = {
+    (action, stateContainer) match {
+
+      case (AudioEngineInitialized(audioEngine), RootState(_, _)) =>
         stateContainer.audioEngine = Some(audioEngine)
-        stateContainer.rootState := Menu(handleAction)
-        this
+        stateContainer.rootState.value = Menu(handleAction)
+
       case (QueryOptionSelected, RootState(_, _)) =>
-        stateContainer.rootState := Query(handleAction)
-        this
+        stateContainer.rootState.value = Query(handleAction)
+
       case (TrichordGeneratorOptionSelected, RootState(_, _)) =>
-        stateContainer.rootState := TrichordGenerator(handleAction)
-        this
+        stateContainer.rootState.value = TrichordGenerator(handleAction)
+
       case (BackToMenu, RootState(_, _)) =>
-        stateContainer.rootState := Menu(handleAction)
-        this
+        stateContainer.rootState.value = Menu(handleAction)
+
       case (PlayChord(chord), RootState(_, Some(audioEngine))) =>
         audioEngine.playChord(chord)
-        this
+
+      case (PlayChord(_), RootState(_, None)) =>
+        println("AudioEngine has not been initialized yet")
     }
   }
 }

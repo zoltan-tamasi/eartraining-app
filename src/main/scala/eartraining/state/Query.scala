@@ -23,7 +23,7 @@ case class QueryState(guessed: Var[GuessStatus],
                       actualChord: Var[Chord],
                       selectedTriadCoreSet: Var[Set[TriadCore]])
 
-case class Query(delegator: RootAction => Root) extends RootOption {
+case class Query(delegator: RootAction => Unit) extends RootOption {
 
   val stateContainer = QueryState(
     guessed = Var(NotGuessed),
@@ -65,7 +65,7 @@ case class Query(delegator: RootAction => Root) extends RootOption {
 
   private def pullRandom[T](list: Seq[T]): T = list(Random.nextInt(list.length))
 
-  def handleAction(action: RootAction): Query = {
+  def handleAction(action: RootAction): Unit = {
     action match {
       case Next =>
         val newChord = createRandomChordFromTriadCore(
@@ -73,33 +73,27 @@ case class Query(delegator: RootAction => Root) extends RootOption {
           stateContainer.octaveExplodeEnabled.get,
           stateContainer.rotationsEnabled.get)
         delegator(PlayChord(newChord))
-        stateContainer.actualChord := newChord
-        stateContainer.guessed := NotGuessed
-        this
+        stateContainer.actualChord.value = newChord
+        stateContainer.guessed.value = NotGuessed
 
       case DoGuess(triadCore: TriadCore) =>
-        stateContainer.guessed := (if (triadCore == stateContainer.actualChord.get.core) GuessedCorrectly else GuessedWrong)
-        this
+        stateContainer.guessed.value = (if (triadCore == stateContainer.actualChord.get.core) GuessedCorrectly else GuessedWrong)
 
       case ChangeTriadCoreSelection(triadCore: TriadCore, enabled: Boolean) =>
         if (enabled) {
-          stateContainer.selectedTriadCoreSet := stateContainer.selectedTriadCoreSet.get + triadCore
+          stateContainer.selectedTriadCoreSet.value = stateContainer.selectedTriadCoreSet.get + triadCore
         } else {
-          stateContainer.selectedTriadCoreSet := stateContainer.selectedTriadCoreSet.get - triadCore
+          stateContainer.selectedTriadCoreSet.value = stateContainer.selectedTriadCoreSet.get - triadCore
         }
-        this
 
       case ChangeRotationSelection(enabled: Boolean) =>
-        stateContainer.rotationsEnabled := enabled
-        this
+        stateContainer.rotationsEnabled.value = enabled
 
       case ChangeOctaveExtractionSelection(enabled: Boolean) =>
-        stateContainer.octaveExplodeEnabled := enabled
-        this
+        stateContainer.octaveExplodeEnabled.value = enabled
 
       case action: RootAction =>
         delegator(action)
-        this
     }
   }
 
