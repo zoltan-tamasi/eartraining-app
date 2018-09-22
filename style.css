@@ -1,7 +1,17 @@
 
+
+#progress {
+    margin: 100px auto;
+}
+
 #note-wheel {
     position: relative;
     padding: 60px;
+    width: 50%;
+}
+
+#chord-notes {
+    width: 50%;
 }
 
 #note-wheel img {

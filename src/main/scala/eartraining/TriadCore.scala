@@ -10,37 +10,23 @@ case class Note(noteName: NoteName, octave: Int) {
 
   def -- () = Note.predecessor(this)
 
-  override def toString: String = s"${NoteName.toString(noteName)}$octave"
+  override def toString: String = s"${noteName}$octave"
 
 }
 
 object Note {
 
-  def lessThanOrEqual(note1: Note, note2: Note): Boolean = {
-    Note.asInt(note1) <= Note.asInt(note2)
-  }
+  def lessThanOrEqual(note1: Note, note2: Note): Boolean =
+    Note.toInt(note1) <= Note.toInt(note2)
 
-  def asInt(note: Note): Int = {
-    val noteValue = note.noteName match {
-      case C => 0
-      case C_# => 1
-      case D => 2
-      case D_# => 3
-      case E => 4
-      case F => 5
-      case F_# => 6
-      case G => 7
-      case G_# => 8
-      case A => 9
-      case A_# => 10
-      case B => 11
-    }
-    noteValue + (note.octave * 12)
-  }
+  def toInt(note: Note): Int =
+    NoteName.toInt(note.noteName) + (note.octave * 12)
 
-  def add(note: Note, toAdd: Int): Note = {
+  def fromInt(noteValue: Int) =
+    Note(NoteName.fromInt(noteValue % 12), noteValue / 12)
+
+  def add(note: Note, toAdd: Int): Note =
     Function.chain(List.fill(toAdd)(successor _))(note)
-  }
 
   def successor(note: Note): Note = note match {
     case Note(B, octave) => Note(C, octave + 1)
@@ -57,43 +43,65 @@ object Note {
 sealed trait NoteName
 
 case object C extends NoteName
-case object C_# extends NoteName
+case object C_# extends NoteName {
+  override val toString = "C#"
+}
 case object D extends NoteName
-case object D_# extends NoteName
+case object D_# extends NoteName {
+  override val toString = "D#"
+}
 case object E extends NoteName
 case object F extends NoteName
-case object F_# extends NoteName
+case object F_# extends NoteName {
+  override val toString = "F#"
+}
 case object G extends NoteName
-case object G_# extends NoteName
+case object G_# extends NoteName {
+  override val toString = "G#"
+}
 case object A extends NoteName
-case object A_# extends NoteName
+case object A_# extends NoteName {
+  override val toString = "A#"
+}
 case object B extends NoteName
 
 object NoteName {
 
-  def toString(noteName: NoteName): String = {
-    noteName match {
-      case C => "C"
-      case C_# => "C#"
-      case D => "D"
-      case D_# => "D#"
-      case E => "E"
-      case F => "F"
-      case F_# => "F#"
-      case G => "G"
-      case G_# => "G#"
-      case A => "A"
-      case A_# => "A#"
-      case B => "B"
-    }
-  }
-
   def fromString(string: String): NoteName =
     List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B).find { _.toString == string }.get
 
-  def add(noteName: NoteName, toAdd: Int): NoteName = {
-    Function.chain(List.fill(toAdd)(successor _))(noteName)
+  def toInt(noteName: NoteName): Int = noteName match {
+    case C => 0
+    case C_# => 1
+    case D => 2
+    case D_# => 3
+    case E => 4
+    case F => 5
+    case F_# => 6
+    case G => 7
+    case G_# => 8
+    case A => 9
+    case A_# => 10
+    case B => 11
   }
+
+  def fromInt(noteValue: Int): NoteName = noteValue match {
+    case 0 => C
+    case 1 => C_#
+    case 2 => D
+    case 3 => D_#
+    case 4 => E
+    case 5 => F
+    case 6 => F_#
+    case 7 => G
+    case 8 => G_#
+    case 9 => A
+    case 10 => A_#
+    case 11 => B
+  }
+
+  def add(noteName: NoteName, toAdd: Int): NoteName =
+    Function.chain(List.fill(toAdd)(successor _))(noteName)
 
   def successor(noteName: NoteName): NoteName = noteName match {
     case C => C_#
@@ -135,6 +143,20 @@ case object Rotation2 extends Rotation
 object Rotation {
   def fromString(string: String): Rotation =
     List(Rotation0, Rotation1, Rotation2).find { _.toString == string }.get
+
+  def fromInt(value: Int): Rotation =
+    value match {
+      case 0 => Rotation0
+      case 1 => Rotation1
+      case 2 => Rotation2
+      case _ => throw new Exception(s"Couldn't convert ${value} to Rotation")
+    }
+
+  def toInt(rotation: Rotation): Int = rotation match {
+    case Rotation0 => 0
+    case Rotation1 => 1
+    case Rotation2 => 2
+  }
 }
 
 sealed trait OctaveExplode
@@ -213,4 +235,34 @@ object TriadCore {
   def allTriadTypes: List[TriadCore] = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3,
     Stacked4s, StackedMinor2, Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor,
     MinorMajorI, Lyd, Locr, LydSus2, AugSus2)
+
+  def invert(triadCore: TriadCore, rotation: Rotation): (TriadCore, Rotation) = {
+    def invertRotation(rotation: Rotation): Rotation = rotation match {
+      case Rotation0 => Rotation1
+      case Rotation1 => Rotation0
+      case Rotation2 => Rotation2
+    }
+
+    triadCore match {
+      case StackedMinor2 => (StackedMinor2, rotation)
+      case Minor2PlusMajor2 => (Major2PlusMinor2, invertRotation(rotation))
+      case Major2PlusMinor2 => (Minor2PlusMajor2, invertRotation(rotation))
+      case MinorMajor => (MinorMajorI, invertRotation(rotation))
+      case MinorMajorI => (MinorMajor, invertRotation(rotation))
+      case Major7Without5 => (Major7Without3, invertRotation(rotation))
+      case Major7Without3 => (Major7Without5, invertRotation(rotation))
+      case Lyd => (Locr, invertRotation(rotation))
+      case Locr => (Lyd, invertRotation(rotation))
+      case Minor7Plus6 => (Minor7Plus6, rotation)
+      case Minor7With3 => (Minor7With5, invertRotation(rotation))
+      case Minor7With5 => (Minor7With3, invertRotation(rotation))
+      case LydSus2 => (AugSus2, invertRotation(rotation))
+      case AugSus2 => (LydSus2, invertRotation(rotation))
+      case Stacked4s => (Stacked4s, rotation)
+      case Diminished => (Diminished, rotation)
+      case Minor => (Major, invertRotation(rotation))
+      case Major => (Minor, invertRotation(rotation))
+      case Augmented => (Augmented, rotation)
+    }
+  }
 }

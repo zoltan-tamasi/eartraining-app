@@ -8,8 +8,8 @@ object InitUI extends StateToUI[Init] {
 
   @dom
   def toUI(init: Init): Binding[Node] = {
-    <div>
-      Initializing...
+    <div class="mx-auto" style="width: 200px;">
+      <img src="img/progress.gif" id="progress"></img>
     </div>
   }
 

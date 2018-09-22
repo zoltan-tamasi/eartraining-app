@@ -2,9 +2,9 @@ package eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
 import com.thoughtworks.binding.Binding.Constants
-import eartraining.state.TrichordGenerator
+import eartraining.state.{PlayCurrentChord, TrichordGenerator}
 import eartraining._
-import org.scalajs.dom.Node
+import org.scalajs.dom.{Event, Node}
 
 object NoteWheel extends StateToUI[TrichordGenerator] {
 
@@ -35,14 +35,14 @@ object NoteWheel extends StateToUI[TrichordGenerator] {
   @dom
   override def toUI(trichordGenerator: TrichordGenerator): Binding[Node] = {
     <div class="row justify-content-center">
-      <div id="note-wheel">
+      <div id="note-wheel" class="col-4">
         {
           Constants(getNoteWheel(trichordGenerator.state.triadCore.bind,
             trichordGenerator.state.rotation.bind,
             trichordGenerator.state.octaveExplode.bind,
             trichordGenerator.state.baseNote.bind): _*) map { case (noteName, pos, selected) =>
               <span class={s"note-label pos-${pos} ${if (selected) "selected" else ""}"}>
-                {NoteName.toString(noteName)}
+                {noteName.toString}
               </span>
             }
         }
@@ -51,14 +51,20 @@ object NoteWheel extends StateToUI[TrichordGenerator] {
           <img src={image} style={rotation}></img>
         }
       </div>
-      Chord notes:
-      <br/>
-      {
-        Chord(trichordGenerator.state.triadCore.bind,
-          trichordGenerator.state.rotation.bind,
-          trichordGenerator.state.octaveExplode.bind,
-          Note(trichordGenerator.state.baseNote.bind.noteName, trichordGenerator.state.baseNote.bind.octave)).toString
-      }
+      <div id="chord-notes" class="col-4">
+        Chord notes:
+        <br/>
+        {
+          Chord(trichordGenerator.state.triadCore.bind,
+            trichordGenerator.state.rotation.bind,
+            trichordGenerator.state.octaveExplode.bind,
+            Note(trichordGenerator.state.baseNote.bind.noteName, trichordGenerator.state.baseNote.bind.octave)).toString
+        }
+        <br/>
+        <button type="button" class="btn btn-primary" onclick={(event: Event) => trichordGenerator.handleAction(PlayCurrentChord) }>
+          Play chord
+        </button>
+      </div>
     </div>
   }
 }

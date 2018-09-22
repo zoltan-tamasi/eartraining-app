@@ -3,7 +3,7 @@ package eartraining.ui
 import com.thoughtworks.binding.{Binding, dom}
 import eartraining._
 import eartraining.state._
-import org.scalajs.dom.Node
+import org.scalajs.dom.{Event, Node}
 
 trait Labeler[A] {
   def label(in : A): String
@@ -83,40 +83,53 @@ trait StateToUI[A] {
 object UI extends StateToUI[Root] {
   @dom
   def toUI(root: Root): Binding[Node] = {
-    <div>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Triad cores</a>
-        <button class="navbar-toggler" type="button">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Trichord generator</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
     {
       root.stateContainer.rootState.bind match {
         case status: Init => {
           InitUI.toUI(status).bind
         }
-        case status: Query => {
-          QueryUI.toUI(status).bind
-        }
-        case status: Menu => {
-          MenuUI.toUI(status).bind
-        }
-        case status: TrichordGenerator => {
-          TrichordGeneratorUI.toUI(status).bind
+
+        case status => {
+          <div>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+              <a class="navbar-brand" href="#" onclick={(e: Event) => root.handleAction(BackToMenu)}>
+                Triad cores
+              </a>
+              <button class="navbar-toggler" type="button">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                  <li class={"nav-item " + (status match { case _: Query => "active" case _ => "" })}>
+                    <a class="nav-link" href="#" onclick={(e: Event) => root.handleAction(QueryOptionSelected)}>
+                      Practice hearing
+                    </a>
+                  </li>
+                  <li class={"nav-item " + (status match { case _: TrichordGenerator => "active" case _ => "" })}>
+                    <a class="nav-link" href="#" onclick={(e: Event) => root.handleAction(TrichordGeneratorOptionSelected)}>
+                      Trichord generator
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+            {
+              status match {
+                case status: Query => {
+                  QueryUI.toUI(status).bind
+                }
+                case status: Menu => {
+                  MenuUI.toUI(status).bind
+                }
+                case status: TrichordGenerator => {
+                  TrichordGeneratorUI.toUI(status).bind
+                }
+              }
+            }
+          </div>
         }
       }
     }
-    </div>
   }
 }

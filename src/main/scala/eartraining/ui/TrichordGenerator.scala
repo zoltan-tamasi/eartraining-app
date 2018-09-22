@@ -4,10 +4,22 @@ import com.thoughtworks.binding.Binding.Constants
 import com.thoughtworks.binding.{Binding, dom}
 import eartraining._
 import eartraining.state._
-import org.scalajs.dom.{Event, Node}
+import org.scalajs.dom.{Event, Node, document}
 import org.scalajs.dom.raw.{HTMLInputElement, HTMLSelectElement}
 
 object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
+
+  def baseNoteSliderHandler(trichordGenerator: TrichordGenerator) = {
+    (event: Event) =>
+      val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value.toInt
+      trichordGenerator.handleAction(ChangeBaseNote(Note.fromInt(selectedValue)))
+  }
+
+  def rotationSliderHandler(trichordGenerator: TrichordGenerator) = {
+    (event: Event) =>
+      val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value.toInt
+      trichordGenerator.handleAction(ChangeRotation(Rotation.fromInt(selectedValue)))
+  }
 
   @dom
   def toUI(trichordGenerator: TrichordGenerator): Binding[Node] = {
@@ -33,51 +45,31 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
           </div>
           <div class="col">
             <div class="form-group">
-              <label for="baseNoteSelect">Base note</label>
-              <select class="form-control" id="baseNoteSelect" onchange={(event: Event) =>
-                val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value
-                trichordGenerator.handleAction(ChangeBaseNote(NoteName.fromString(selectedValue)))
-              }>
-                {
-                Constants(List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#, B): _*) map { note =>
-                  <option selected={trichordGenerator.state.baseNote.bind.noteName == note} value={note.toString}>
-                    {note.toString}
-                  </option>
-                }
-                }
-              </select>
-            </div>
-          </div>
-          <div class="col">
-            <div class="form-group">
-              <label for="octaveSelect">Octave</label>
-              <select class="form-control" id="octaveSelect" onchange={(event: Event) =>
-                val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value
-                trichordGenerator.handleAction(ChangeOctave(selectedValue.toInt))
-              }>
-                {
-                Constants(List(2, 3, 4): _*) map { octave =>
-                  <option selected={trichordGenerator.state.baseNote.bind.octave == octave} value={octave.toString}>
-                    {octave.toString}
-                  </option>
-                }
-                }
-              </select>
+              <label for="baseNoteSlider">Base note: {trichordGenerator.state.baseNote.bind.toString}</label>
+              <input type="range" class="form-control-range" id="baseNoteSlider" min="24" max="60"
+                     list={document.getElementById("baseNoteMarks").asInstanceOf[HTMLInputElement]}
+                     value={Note.toInt(trichordGenerator.state.baseNote.bind).toString}
+                     oninput={baseNoteSliderHandler(trichordGenerator)} onchange={baseNoteSliderHandler(trichordGenerator)}/>
+              <datalist id="baseNoteMarks">
+                <option value="24" label="C 2"/>
+                <option value="36" label="C 3"/>
+                <option value="48" label="C 4"/>
+                <option value="60" label="C 5"/>
+              </datalist>
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col">
             <div class="form-group">
-              <label for="rotationSelect">Rotations</label>
-              <select class="form-control" id="rotationSelect" onchange={(event: Event) =>
-                val selectedValue = event.target.asInstanceOf[HTMLSelectElement].value
-                trichordGenerator.handleAction(ChangeRotation(Rotation.fromString(selectedValue)))
-              }>
-                <option value={Rotation0.toString} selected={ trichordGenerator.state.rotation.bind == Rotation0 }>1st position</option>
-                <option value={Rotation1.toString} selected={ trichordGenerator.state.rotation.bind == Rotation1 }>2nd position</option>
-                <option value={Rotation2.toString} selected={ trichordGenerator.state.rotation.bind == Rotation2 }>3rd position</option>
-              </select>
+              <label for="baseNoteSlider">Rotation: {trichordGenerator.state.rotation.bind match {
+                case Rotation0 => "1st position"
+                case Rotation1 => "2nd position"
+                case Rotation2 => "3rd position"
+              }}</label>
+              <input type="range" class="form-control-range" id="rotationSlider" min="0" max="2"
+                     value={Rotation.toInt(trichordGenerator.state.rotation.bind).toString}
+                     oninput={rotationSliderHandler(trichordGenerator)} onchange={rotationSliderHandler(trichordGenerator)}/>
             </div>
           </div>
           <div class="col">
@@ -92,6 +84,14 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
             </input>
           </div>
         </div>
+        <div class="row">
+          <button class="btn btn-primary" onclick={(_: Event) => trichordGenerator.handleAction(Invert)}>
+            Invert
+          </button>
+          <button class="btn btn-primary" onclick={(_: Event) => trichordGenerator.handleAction(Randomize) }>
+            Randomize
+          </button>
+        </div>
 
         <hr/>
 
@@ -99,22 +99,6 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
 
         <hr/>
 
-        <div class="row justify-content-center">
-          <button onclick={(event: Event) => trichordGenerator.handleAction(PlayCurrentChord) }>
-            Play Chord
-          </button>
-          <button onclick={(_: Event) => trichordGenerator.handleAction(Randomize) }>
-            Randomize
-          </button>
-        </div>
-
-        <hr/>
-
-        <div class="row justify-content-center">
-          <button onclick={(_: Event) => trichordGenerator.handleAction(BackToMenu)}>
-            Back
-          </button>
-        </div>
       </form>
     </div>
 

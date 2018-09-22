@@ -12,8 +12,10 @@ case object BackToMenu extends TrichordGeneratorAction
 case class ChangeRotation(rotation: Rotation) extends TrichordGeneratorAction
 case class ChangeOctaveExploded(enabled: OctaveExplode) extends TrichordGeneratorAction
 case class ChangeTriadCore(triadCore: TriadCore) extends TrichordGeneratorAction
-case class ChangeBaseNote(noteName: NoteName) extends TrichordGeneratorAction
+case class ChangeBaseNoteName(noteName: NoteName) extends TrichordGeneratorAction
 case class ChangeOctave(octave: Int) extends TrichordGeneratorAction
+case class ChangeBaseNote(note: Note) extends TrichordGeneratorAction
+case object Invert extends TrichordGeneratorAction
 
 case class TrichordGeneratorState(rotation: Var[Rotation],
                                   octaveExplode: Var[OctaveExplode],
@@ -49,11 +51,21 @@ case class TrichordGenerator(delegator: RootAction => Unit) extends RootOption {
       case ChangeTriadCore(triadCore: TriadCore) =>
         state.triadCore.value = triadCore
 
-      case ChangeBaseNote(noteName: NoteName) =>
+      case ChangeBaseNoteName(noteName: NoteName) =>
         state.baseNote.value = Note(noteName, state.baseNote.get.octave)
 
       case ChangeOctave(octave: Int) =>
         state.baseNote.value = Note(state.baseNote.get.noteName, octave)
+
+      case ChangeBaseNote(noteValue) =>
+        state.baseNote.value = noteValue
+
+      case Invert =>
+        TriadCore.invert(state.triadCore.value, state.rotation.value) match {
+          case (triadCore, rotation) =>
+            state.triadCore.value = triadCore
+            state.rotation.value = rotation
+        }
 
       case PlayCurrentChord =>
         delegator(PlayChord(Chord(state.triadCore.get, state.rotation.get, state.octaveExplode.get, state.baseNote.get)))
