@@ -20,7 +20,11 @@ case object Invert extends TrichordGeneratorAction
 case class TrichordGeneratorState(rotation: Var[Rotation],
                                   octaveExplode: Var[OctaveExplode],
                                   triadCore: Var[TriadCore],
-                                  baseNote: Var[Note])
+                                  baseNote: Var[Note],
+                                  triadCoreLocked: Var[Boolean],
+                                  baseNoteLocked: Var[Boolean],
+                                  rotationLocked: Var[Boolean],
+                                  octaveExplodeLocked: Var[Boolean])
 
 case class TrichordGenerator(delegator: RootAction => Unit) extends RootOption {
 
@@ -28,19 +32,31 @@ case class TrichordGenerator(delegator: RootAction => Unit) extends RootOption {
     rotation = Var(Rotation0),
     octaveExplode = Var(NotOctaveExploded),
     triadCore = Var(Major),
-    baseNote = Var(Note(C, 3))
+    baseNote = Var(Note(C, 3)),
+    triadCoreLocked = Var(false),
+    baseNoteLocked = Var(false),
+    rotationLocked = Var(false),
+    octaveExplodeLocked = Var(false)
   )
 
   def handleAction(action: RootAction): Unit = {
     action match {
       case Randomize =>
-        state.rotation.value = pullRandom(List(Rotation0, Rotation1, Rotation2))
-        state.octaveExplode.value = pullRandom(List(OctaveExploded, NotOctaveExploded))
-        state.triadCore.value = pullRandom(TriadCore.allTriadTypes)
-        state.baseNote.value = pullRandom(for {
-          noteName <- List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#)
-          octave <- List(2, 3, 4)
-        } yield Note(noteName, octave))
+        if (!state.rotationLocked.value) {
+          state.rotation.value = pullRandom(List(Rotation0, Rotation1, Rotation2))
+        }
+        if (!state.octaveExplodeLocked.value) {
+          state.octaveExplode.value = pullRandom(List(OctaveExploded, NotOctaveExploded))
+        }
+        if (!state.triadCoreLocked.value) {
+          state.triadCore.value = pullRandom(TriadCore.allTriadTypes)
+        }
+        if (!state.baseNoteLocked.value) {
+          state.baseNote.value = pullRandom(for {
+            noteName <- List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#)
+            octave <- List(2, 3, 4)
+          } yield Note(noteName, octave))
+        }
 
       case ChangeRotation(rotation: Rotation) =>
         state.rotation.value = rotation
