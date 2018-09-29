@@ -1,8 +1,8 @@
-package eartraining
+package net.zoltantamasi.eartraining
 
 import com.thoughtworks.binding.dom
-import eartraining.state.{AudioEngineInitialized, Root}
-import eartraining.ui.UI
+import net.zoltantamasi.eartraining.state.{AudioEngineInitialized, Root}
+import net.zoltantamasi.eartraining.ui._
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.AudioContext
 

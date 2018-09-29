@@ -1,12 +1,12 @@
-package eartraining
+package net.zoltantamasi.eartraining
 
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.{AudioBuffer, AudioContext}
 
 import scala.annotation.tailrec
+import scala.collection.mutable.Map
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.js.typedarray.ArrayBuffer
-import scala.collection.mutable.Map
 
 trait AudioEngine {
   def playChord(chord: Chord): Unit

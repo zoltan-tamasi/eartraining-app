@@ -1,7 +1,7 @@
-package eartraining.state
+package net.zoltantamasi.eartraining.state
 
 import com.thoughtworks.binding.Binding.Var
-import eartraining.{AudioEngine, Chord}
+import net.zoltantamasi.eartraining.{AudioEngine, Chord}
 
 trait RootOption
 

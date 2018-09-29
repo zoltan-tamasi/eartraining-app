@@ -1,4 +1,4 @@
-package eartraining
+package net.zoltantamasi.eartraining
 
 case class Note(noteName: NoteName, octave: Int) {
 

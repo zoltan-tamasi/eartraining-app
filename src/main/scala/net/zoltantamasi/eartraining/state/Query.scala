@@ -1,7 +1,7 @@
-package eartraining.state
+package net.zoltantamasi.eartraining.state
 
 import com.thoughtworks.binding.Binding.Var
-import eartraining._
+import net.zoltantamasi.eartraining._
 
 import scala.util.Random
 

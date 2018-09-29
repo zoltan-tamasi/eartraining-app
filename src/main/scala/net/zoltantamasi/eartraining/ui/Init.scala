@@ -1,7 +1,7 @@
-package eartraining.ui
+package net.zoltantamasi.eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
-import eartraining.state.Init
+import net.zoltantamasi.eartraining.state.Init
 import org.scalajs.dom.Node
 
 object InitUI extends StateToUI[Init] {

@@ -1,11 +1,11 @@
-package eartraining.ui
+package net.zoltantamasi.eartraining.ui
 
 import com.thoughtworks.binding.Binding.Constants
 import com.thoughtworks.binding.{Binding, dom}
-import eartraining._
-import eartraining.state._
-import org.scalajs.dom.{Event, Node, document}
+import net.zoltantamasi.eartraining._
+import net.zoltantamasi.eartraining.state._
 import org.scalajs.dom.raw.{HTMLInputElement, HTMLSelectElement}
+import org.scalajs.dom.{Event, Node, document}
 
 object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
 

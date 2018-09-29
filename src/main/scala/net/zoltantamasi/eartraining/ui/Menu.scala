@@ -1,7 +1,7 @@
-package eartraining.ui
+package net.zoltantamasi.eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
-import eartraining.state._
+import net.zoltantamasi.eartraining.state.{Menu, ToQuery, ToTrichordGenerator}
 import org.scalajs.dom.{Event, Node}
 
 object MenuUI extends StateToUI[Menu] {

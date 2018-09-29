@@ -1,9 +1,9 @@
-package eartraining.ui
+package net.zoltantamasi.eartraining.ui
 
-import com.thoughtworks.binding.{Binding, dom}
 import com.thoughtworks.binding.Binding.Constants
-import eartraining.state.{PlayCurrentChord, TrichordGenerator}
-import eartraining._
+import com.thoughtworks.binding.{Binding, dom}
+import net.zoltantamasi.eartraining._
+import net.zoltantamasi.eartraining.state.{PlayCurrentChord, TrichordGenerator}
 import org.scalajs.dom.{Event, Node}
 
 object NoteWheel extends StateToUI[TrichordGenerator] {

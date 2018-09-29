@@ -1,4 +1,4 @@
-package eartraining.state
+package net.zoltantamasi.eartraining.state
 
 sealed trait MenuAction extends RootAction
 case object ToQuery extends MenuAction

@@ -1,12 +1,12 @@
-package eartraining.ui
+package net.zoltantamasi.eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
-import eartraining._
-import eartraining.state._
+import net.zoltantamasi.eartraining._
+import net.zoltantamasi.eartraining.state._
 import org.scalajs.dom.{Event, Node}
 
 trait Labeler[A] {
-  def label(in : A): String
+  def label(in: A): String
 }
 
 trait GetImage[A] {
