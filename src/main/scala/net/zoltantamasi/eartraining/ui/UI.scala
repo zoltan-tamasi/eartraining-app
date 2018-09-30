@@ -84,7 +84,7 @@ object UI extends StateToUI[Root] {
   @dom
   def toUI(root: Root): Binding[Node] = {
     {
-      root.stateContainer.rootState.bind match {
+      root.state.rootState.bind match {
         case status: Init => {
           InitUI.toUI(status).bind
         }

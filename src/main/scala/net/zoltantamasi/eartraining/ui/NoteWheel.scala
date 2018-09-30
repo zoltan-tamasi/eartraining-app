@@ -4,7 +4,8 @@ import com.thoughtworks.binding.Binding.Constants
 import com.thoughtworks.binding.{Binding, dom}
 import net.zoltantamasi.eartraining._
 import net.zoltantamasi.eartraining.state.{PlayCurrentChord, TrichordGenerator}
-import org.scalajs.dom.{Event, Node}
+import org.scalajs.dom.raw.HTMLButtonElement
+import org.scalajs.dom.{Event, Node, document}
 
 object NoteWheel extends StateToUI[TrichordGenerator] {
 
@@ -35,7 +36,7 @@ object NoteWheel extends StateToUI[TrichordGenerator] {
   @dom
   override def toUI(trichordGenerator: TrichordGenerator): Binding[Node] = {
     <div class="row justify-content-center">
-      <div id="note-wheel" class="col-4">
+      <div id="note-wheel" class="col-lg-4 col-md-8 col-sm-12">
         {
           Constants(getNoteWheel(trichordGenerator.state.triadCore.bind,
             trichordGenerator.state.rotation.bind,
@@ -61,9 +62,13 @@ object NoteWheel extends StateToUI[TrichordGenerator] {
             Note(trichordGenerator.state.baseNote.bind.noteName, trichordGenerator.state.baseNote.bind.octave)).toString
         }
         <br/>
-        <button type="button" class="btn btn-primary" onclick={(event: Event) => trichordGenerator.handleAction(PlayCurrentChord) }>
-          Play chord
-        </button>
+        {
+          val disabledClass = if (trichordGenerator.state.audioEngineReady.bind) "btn-primary" else "btn-secondary disabled"
+
+          <button id="play-chord-button" type="button" class={"btn " + disabledClass} onclick={(event: Event) => trichordGenerator.handleAction(PlayCurrentChord) }>
+            Play chord
+          </button>
+        }
       </div>
     </div>
   }

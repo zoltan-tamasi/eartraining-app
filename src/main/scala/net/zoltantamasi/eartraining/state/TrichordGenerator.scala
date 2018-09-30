@@ -24,9 +24,10 @@ case class TrichordGeneratorState(rotation: Var[Rotation],
                                   triadCoreLocked: Var[Boolean],
                                   baseNoteLocked: Var[Boolean],
                                   rotationLocked: Var[Boolean],
-                                  octaveExplodeLocked: Var[Boolean])
+                                  octaveExplodeLocked: Var[Boolean],
+                                  audioEngineReady: Var[Boolean])
 
-case class TrichordGenerator(delegator: RootAction => Unit) extends RootOption {
+case class TrichordGenerator(delegator: RootAction => Unit, rootState: RootState) extends RootOption {
 
   val state = TrichordGeneratorState(
     rotation = Var(Rotation0),
@@ -36,7 +37,8 @@ case class TrichordGenerator(delegator: RootAction => Unit) extends RootOption {
     triadCoreLocked = Var(false),
     baseNoteLocked = Var(false),
     rotationLocked = Var(false),
-    octaveExplodeLocked = Var(false)
+    octaveExplodeLocked = Var(false),
+    audioEngineReady = rootState.audioEngineReady
   )
 
   def handleAction(action: RootAction): Unit = {
@@ -84,7 +86,10 @@ case class TrichordGenerator(delegator: RootAction => Unit) extends RootOption {
         }
 
       case PlayCurrentChord =>
-        delegator(PlayChord(Chord(state.triadCore.get, state.rotation.get, state.octaveExplode.get, state.baseNote.get)))
+        if (state.audioEngineReady.get) {
+          delegator(PlayChord(Chord(state.triadCore.get, state.rotation.get, state.octaveExplode.get, state.baseNote.get)))
+          state.audioEngineReady.value = false
+        }
 
       case action: RootAction =>
         delegator(action)

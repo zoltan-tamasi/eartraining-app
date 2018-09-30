@@ -1,7 +1,7 @@
 package net.zoltantamasi.eartraining.state
 
 import com.thoughtworks.binding.Binding.Var
-import net.zoltantamasi.eartraining.{AudioEngine, Chord}
+import net.zoltantamasi.eartraining.{AudioEngine, AudioEvent, AudioFinished, Chord}
 
 trait RootOption
 
@@ -10,34 +10,44 @@ case class AudioEngineInitialized(audioEngine: AudioEngine) extends RootAction
 case object QueryOptionSelected extends RootAction
 case object TrichordGeneratorOptionSelected extends RootAction
 case class PlayChord(chord: Chord) extends RootAction
+case object RootAudioFinished extends RootAction
 
-case class RootState(rootState: Var[RootOption], var audioEngine: Option[AudioEngine])
+case class RootState(rootState: Var[RootOption], var audioEngine: Option[AudioEngine], audioEngineReady: Var[Boolean])
 
 case class Root() {
 
-  val stateContainer: RootState = RootState(Var(Init()), None)
+  val state: RootState = RootState(
+    rootState = Var(Init()),
+    audioEngine = None,
+    audioEngineReady = Var(false))
 
   def handleAction(action: RootAction): Unit = {
-    (action, stateContainer) match {
+    action match {
 
-      case (AudioEngineInitialized(audioEngine), RootState(_, _)) =>
-        stateContainer.audioEngine = Some(audioEngine)
-        stateContainer.rootState.value = Menu(handleAction)
+      case AudioEngineInitialized(audioEngine) =>
+        state.audioEngine = Some(audioEngine)
+        state.rootState.value = Menu(handleAction)
+        state.audioEngineReady.value = true
 
-      case (QueryOptionSelected, RootState(_, _)) =>
-        stateContainer.rootState.value = Query(handleAction)
+      case QueryOptionSelected =>
+        state.rootState.value = Query(handleAction)
 
-      case (TrichordGeneratorOptionSelected, RootState(_, _)) =>
-        stateContainer.rootState.value = TrichordGenerator(handleAction)
+      case TrichordGeneratorOptionSelected =>
+        state.rootState.value = TrichordGenerator(handleAction, state)
 
-      case (BackToMenu, RootState(_, _)) =>
-        stateContainer.rootState.value = Menu(handleAction)
+      case BackToMenu =>
+        state.rootState.value = Menu(handleAction)
 
-      case (PlayChord(chord), RootState(_, Some(audioEngine))) =>
-        audioEngine.playChord(chord)
+      case PlayChord(chord) =>
+        state.audioEngine match {
+          case Some(audioEngine) =>
+            audioEngine.playChord(chord)
+          case None =>
+            println("AudioEngine has not been initialized yet")
+        }
 
-      case (PlayChord(_), RootState(_, None)) =>
-        println("AudioEngine has not been initialized yet")
+      case RootAudioFinished =>
+        state.audioEngineReady.value = true
     }
   }
 }

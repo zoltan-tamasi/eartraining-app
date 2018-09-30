@@ -1,16 +1,21 @@
 package net.zoltantamasi.eartraining
 
 import org.scalajs.dom.ext.Ajax
-import org.scalajs.dom.raw.{AudioBuffer, AudioContext}
+import org.scalajs.dom.raw.{AudioBuffer, AudioContext, Event}
+import org.scalajs.dom.{console, window}
 
 import scala.annotation.tailrec
 import scala.collection.mutable.Map
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.js.typedarray.ArrayBuffer
+import scala.util.{Failure, Success}
 
 trait AudioEngine {
   def playChord(chord: Chord): Unit
 }
+
+sealed trait AudioEvent
+case object AudioFinished extends AudioEvent
 
 object AudioEngine {
 
@@ -36,9 +41,13 @@ object AudioEngine {
     case B => 1.887749
   }
 
-  private def playSound(note: Note)(implicit context: AudioContext, audioBuffers: Map[Note, (AudioBuffer, Double)]): Unit = {
+  private def playSound(note: Note)(implicit context: AudioContext, audioBuffers: Map[Note, (AudioBuffer, Double)]): Future[Unit] = {
     val source = context.createBufferSource()
     val audioBuffer = audioBuffers.get(note)
+    val gain = context.createGain()
+
+    val p = Promise[Unit]()
+
     source.buffer = audioBuffer match {
       case Some((audioBuffer, _)) => audioBuffer
       case None => {
@@ -46,12 +55,24 @@ object AudioEngine {
         audioBuffers.get(note.copy(octave = 5)).get._1
       }
     }
-    source.connect(context.destination)
+
+    source.connect(gain)
+    gain.connect(context.destination)
     source.playbackRate.value = audioBuffer.get._2
+    source.onended = (event: Event) => {
+      p.success(())
+    }
+
+    window.setTimeout(() => {
+      p.tryFailure(new Throwable("Future timed out"))
+    }, 4000)
+
+    gain.gain.linearRampToValueAtTime(0, context.currentTime + 2)
     source.start(0)
+    p.future
   }
 
-  def createWithAudioContext(context: AudioContext): Future[AudioEngine] = {
+  def createWithAudioContext(context: AudioContext, handler: (AudioEvent) => Unit): Future[AudioEngine] = {
 
     def loadSound(url: String): Future[AudioBuffer] = {
       val p = Promise[AudioBuffer]()
@@ -163,7 +184,13 @@ object AudioEngine {
       new AudioEngine {
         override def playChord(chord: Chord): Unit = {
           println(s"Chord played: ${Chord.notesOf(chord)}")
-          Chord.notesOf(chord).foreach(note => playSound(note))
+          Future.sequence(Chord.notesOf(chord).map(playSound _))
+            .onComplete({
+              case Success(_) =>
+                handler(AudioFinished)
+              case Failure(throwable) =>
+                console.error(throwable.toString)
+            })
         }
       }
     }
