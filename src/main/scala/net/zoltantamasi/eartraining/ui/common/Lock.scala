@@ -1,7 +1,8 @@
-package net.zoltantamasi.eartraining.ui
+package net.zoltantamasi.eartraining.ui.common
 
 import com.thoughtworks.binding.Binding.Var
 import com.thoughtworks.binding.{Binding, dom}
+import net.zoltantamasi.eartraining.ui.StateToUI
 import org.scalajs.dom.{Event, Node}
 
 object Lock extends StateToUI[Var[Boolean]] {

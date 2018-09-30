@@ -3,6 +3,10 @@ package net.zoltantamasi.eartraining.ui
 import com.thoughtworks.binding.{Binding, dom}
 import net.zoltantamasi.eartraining._
 import net.zoltantamasi.eartraining.state._
+import net.zoltantamasi.eartraining.state.generator.TrichordGenerator
+import net.zoltantamasi.eartraining.state.practice.Practice
+import net.zoltantamasi.eartraining.ui.generator.TrichordGeneratorUI
+import net.zoltantamasi.eartraining.ui.practice.PracticeUI
 import org.scalajs.dom.{Event, Node}
 
 trait Labeler[A] {
@@ -13,8 +17,7 @@ trait GetImage[A] {
   def getImage(in : A): String
 }
 
-
-trait StateToUI[A] {
+trait UIHelpers {
 
   implicit object TriadCoreLabeler extends Labeler[TriadCore] {
     override def label(in: TriadCore): String = {
@@ -75,6 +78,10 @@ trait StateToUI[A] {
     def getImage(implicit imageGetter: GetImage[T]) =
       imageGetter.getImage(data)
   }
+}
+
+
+trait StateToUI[A] extends UIHelpers {
 
   def toUI(in : A): Binding[Node]
 
@@ -101,7 +108,7 @@ object UI extends StateToUI[Root] {
 
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
-                  <li class={"nav-item " + (status match { case _: Query => "active" case _ => "" })}>
+                  <li class={"nav-item " + (status match { case _: Practice => "active" case _ => "" })}>
                     <a class="nav-link" href="#" onclick={(e: Event) => root.handleAction(QueryOptionSelected)}>
                       Practice hearing
                     </a>
@@ -116,8 +123,8 @@ object UI extends StateToUI[Root] {
             </nav>
             {
               status match {
-                case status: Query => {
-                  QueryUI.toUI(status).bind
+                case status: Practice => {
+                  PracticeUI.toUI(status).bind
                 }
                 case status: Menu => {
                   MenuUI.toUI(status).bind

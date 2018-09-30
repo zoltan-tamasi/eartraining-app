@@ -19,6 +19,20 @@
     height: 200px;
 }
 
+#guess-chord img {
+    width: 80px;
+    height: 80px;
+}
+
+#guess-chord button {
+    width: 280px;
+}
+
+#guess-chord button.either {
+    width: initial;
+}
+
+
 .note-label {
   color: #b6b4b4;
   position: absolute;

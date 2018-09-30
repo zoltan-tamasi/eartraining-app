@@ -1,14 +1,14 @@
-package net.zoltantamasi.eartraining.state
+package net.zoltantamasi.eartraining.state.generator
 
 import com.thoughtworks.binding.Binding.Var
 import net.zoltantamasi.eartraining._
+import net.zoltantamasi.eartraining.state._
 
 import scala.util.Random
 
 sealed trait TrichordGeneratorAction extends RootAction
 case object Randomize extends TrichordGeneratorAction
 case object PlayCurrentChord extends TrichordGeneratorAction
-case object BackToMenu extends TrichordGeneratorAction
 case class ChangeRotation(rotation: Rotation) extends TrichordGeneratorAction
 case class ChangeOctaveExploded(enabled: OctaveExplode) extends TrichordGeneratorAction
 case class ChangeTriadCore(triadCore: TriadCore) extends TrichordGeneratorAction

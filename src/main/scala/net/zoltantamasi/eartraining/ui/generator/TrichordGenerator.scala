@@ -1,9 +1,11 @@
-package net.zoltantamasi.eartraining.ui
+package net.zoltantamasi.eartraining.ui.generator
 
 import com.thoughtworks.binding.Binding.Constants
 import com.thoughtworks.binding.{Binding, dom}
 import net.zoltantamasi.eartraining._
-import net.zoltantamasi.eartraining.state._
+import net.zoltantamasi.eartraining.state.generator._
+import net.zoltantamasi.eartraining.ui.common.{Lock, NoteWheel}
+import net.zoltantamasi.eartraining.ui.StateToUI
 import org.scalajs.dom.raw.{HTMLInputElement, HTMLSelectElement}
 import org.scalajs.dom.{Event, Node, document}
 
@@ -103,7 +105,8 @@ object TrichordGeneratorUI extends StateToUI[TrichordGenerator] {
 
         <hr/>
 
-        { NoteWheel.toUI(trichordGenerator).bind }
+        { NoteWheel.toUI(trichordGenerator.state.triadCore, trichordGenerator.state.rotation, trichordGenerator.state.octaveExplode,
+                         trichordGenerator.state.baseNote, trichordGenerator.state.audioEngineReady, trichordGenerator.handleAction).bind }
 
         <hr/>
 

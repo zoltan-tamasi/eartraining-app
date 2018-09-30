@@ -1,7 +1,9 @@
 package net.zoltantamasi.eartraining.state
 
 import com.thoughtworks.binding.Binding.Var
-import net.zoltantamasi.eartraining.{AudioEngine, AudioEvent, AudioFinished, Chord}
+import net.zoltantamasi.eartraining.state.generator.{TrichordGenerator}
+import net.zoltantamasi.eartraining.state.practice.Practice
+import net.zoltantamasi.eartraining.{AudioEngine, Chord}
 
 trait RootOption
 
@@ -11,6 +13,7 @@ case object QueryOptionSelected extends RootAction
 case object TrichordGeneratorOptionSelected extends RootAction
 case class PlayChord(chord: Chord) extends RootAction
 case object RootAudioFinished extends RootAction
+case object BackToMenu extends RootAction
 
 case class RootState(rootState: Var[RootOption], var audioEngine: Option[AudioEngine], audioEngineReady: Var[Boolean])
 
@@ -30,7 +33,7 @@ case class Root() {
         state.audioEngineReady.value = true
 
       case QueryOptionSelected =>
-        state.rootState.value = Query(handleAction)
+        state.rootState.value = Practice(handleAction, state)
 
       case TrichordGeneratorOptionSelected =>
         state.rootState.value = TrichordGenerator(handleAction, state)

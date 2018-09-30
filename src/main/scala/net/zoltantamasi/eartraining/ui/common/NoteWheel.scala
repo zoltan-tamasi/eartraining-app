@@ -1,13 +1,14 @@
-package net.zoltantamasi.eartraining.ui
+package net.zoltantamasi.eartraining.ui.common
 
 import com.thoughtworks.binding.Binding.Constants
 import com.thoughtworks.binding.{Binding, dom}
 import net.zoltantamasi.eartraining._
-import net.zoltantamasi.eartraining.state.{PlayCurrentChord, TrichordGenerator}
-import org.scalajs.dom.raw.HTMLButtonElement
-import org.scalajs.dom.{Event, Node, document}
+import net.zoltantamasi.eartraining.state.RootAction
+import net.zoltantamasi.eartraining.state.generator.PlayCurrentChord
+import net.zoltantamasi.eartraining.ui.UIHelpers
+import org.scalajs.dom.{Event, Node}
 
-object NoteWheel extends StateToUI[TrichordGenerator] {
+object NoteWheel extends UIHelpers {
 
   private def getImageAndRotation(triadCore: TriadCore, rotation: Rotation): (String, String) = {
     val imageRotation = rotation match {
@@ -34,21 +35,22 @@ object NoteWheel extends StateToUI[TrichordGenerator] {
   }
 
   @dom
-  override def toUI(trichordGenerator: TrichordGenerator): Binding[Node] = {
+  def toUI(triadCore: Binding[TriadCore], rotationBinding: Binding[Rotation], octaveExplode: Binding[OctaveExplode], baseNote: Binding[Note],
+                    audioEngineReady: Binding[Boolean], handleAction: (RootAction) => Unit): Binding[Node] = {
     <div class="row justify-content-center">
       <div id="note-wheel" class="col-lg-4 col-md-8 col-sm-12">
         {
-          Constants(getNoteWheel(trichordGenerator.state.triadCore.bind,
-            trichordGenerator.state.rotation.bind,
-            trichordGenerator.state.octaveExplode.bind,
-            trichordGenerator.state.baseNote.bind): _*) map { case (noteName, pos, selected) =>
+          Constants(getNoteWheel(triadCore.bind,
+            rotationBinding.bind,
+            octaveExplode.bind,
+            baseNote.bind): _*) map { case (noteName, pos, selected) =>
               <span class={s"note-label pos-${pos} ${if (selected) "selected" else ""}"}>
                 {noteName.toString}
               </span>
             }
         }
         {
-          val (image, rotation) = getImageAndRotation(trichordGenerator.state.triadCore.bind, trichordGenerator.state.rotation.bind)
+          val (image, rotation) = getImageAndRotation(triadCore.bind, rotationBinding.bind)
           <img src={image} style={rotation}></img>
         }
       </div>
@@ -56,16 +58,16 @@ object NoteWheel extends StateToUI[TrichordGenerator] {
         Chord notes:
         <br/>
         {
-          Chord(trichordGenerator.state.triadCore.bind,
-            trichordGenerator.state.rotation.bind,
-            trichordGenerator.state.octaveExplode.bind,
-            Note(trichordGenerator.state.baseNote.bind.noteName, trichordGenerator.state.baseNote.bind.octave)).toString
+          Chord(triadCore.bind,
+            rotationBinding.bind,
+            octaveExplode.bind,
+            Note(baseNote.bind.noteName, baseNote.bind.octave)).toString
         }
         <br/>
         {
-          val disabledClass = if (trichordGenerator.state.audioEngineReady.bind) "btn-primary" else "btn-secondary disabled"
+          val disabledClass = if (audioEngineReady.bind) "btn-primary" else "btn-secondary disabled"
 
-          <button id="play-chord-button" type="button" class={"btn " + disabledClass} onclick={(event: Event) => trichordGenerator.handleAction(PlayCurrentChord) }>
+          <button id="play-chord-button" type="button" class={"btn " + disabledClass} onclick={(_: Event) => handleAction(PlayCurrentChord) }>
             Play chord
           </button>
         }
