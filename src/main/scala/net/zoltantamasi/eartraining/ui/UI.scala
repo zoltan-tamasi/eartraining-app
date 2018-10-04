@@ -38,8 +38,8 @@ trait UIHelpers {
         case Major => "major (3, 5, 4)"
         case Augmented => "augmented (4, 4, 4)"
         case Diminished => "diminished (3, 3, 6)"
-        case Major7Without5 => "major 7 + 3rd (1, 7, 4)"
-        case Major7Without3 => "major 7 + 5th (1, 4, 7)"
+        case Major7With5 => "major 7 + 5th (1, 7, 4)"
+        case Major7With3 => "major 7 + 3rd (1, 4, 7)"
         case Stacked4s => "stacked 4ths/5ths (2, 5, 5)"
       }
     }
@@ -64,8 +64,8 @@ trait UIHelpers {
         case Major => "/img/3-5-4.png"
         case Augmented => "/img/4-4-4.png"
         case Diminished => "/img/3-3-6.png"
-        case Major7Without5 => "/img/1-7-4.png"
-        case Major7Without3 => "/img/1-4-7.png"
+        case Major7With5 => "/img/1-7-4.png"
+        case Major7With3 => "/img/1-4-7.png"
         case Stacked4s => "/img/2-5-5.png"
       }
     }

@@ -22,20 +22,6 @@ object PracticeUI extends StateToUI[Practice] {
   }
 
   @dom
-  def buttonForTricore(triadCore: TriadCore): Binding[Node] = {
-    <button class="btn btn-outline-secondary">
-      {triadCore.label}<img src={triadCore.getImage}></img>
-    </button>
-  }
-
-  @dom
-  def buttonForTricores(triadCore1: TriadCore, triadCore2: TriadCore): Binding[Node] = {
-    <button class="btn btn-outline-secondary either">
-      Either
-    </button>
-  }
-
-  @dom
   def toUI(practice: Practice): Binding[Node] = {
     <div class="container">
       <form onsubmit={(event: Event) => event.preventDefault()}>
@@ -92,58 +78,7 @@ object PracticeUI extends StateToUI[Practice] {
 
         <hr/>
           <div class="row justify-content-center">
-            <div class="col-8" id="guess-chord">
-              <div class="row justify-content-center">
-                {buttonForTricore(StackedMinor2).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Minor2PlusMajor2).bind}
-                {buttonForTricores(Minor2PlusMajor2, Major2PlusMinor2).bind}
-                {buttonForTricore(Major2PlusMinor2).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(MinorMajor).bind}
-                {buttonForTricores(MinorMajor, MinorMajorI).bind}
-                {buttonForTricore(MinorMajorI).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Major7Without3).bind}
-                {buttonForTricores(Major7Without3, Major7Without5).bind}
-                {buttonForTricore(Major7Without5).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Lyd).bind}
-                {buttonForTricores(Lyd, Locr).bind}
-                {buttonForTricore(Locr).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Minor7Plus6).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Minor7With3).bind}
-                {buttonForTricores(Minor7With3, Minor7With5).bind}
-                {buttonForTricore(Minor7With5).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(LydSus2).bind}
-                {buttonForTricores(LydSus2, AugSus2).bind}
-                {buttonForTricore(AugSus2).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Stacked4s).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Diminished).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Minor).bind}
-                {buttonForTricores(Minor, Major).bind}
-                {buttonForTricore(Major).bind}
-              </div>
-              <div class="row justify-content-center">
-                {buttonForTricore(Augmented).bind}
-              </div>
-            </div>
+            { GuessUI.toUI(practice.state.guessStatus, practice.handleAction).bind }
             <div class="col-4">
 
               {

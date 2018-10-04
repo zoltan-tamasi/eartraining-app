@@ -8,8 +8,9 @@ import scala.util.Random
 
 sealed trait GuessStatus
 case object NotGuessed extends GuessStatus
-case object GuessedWrong extends GuessStatus
-case object GuessedCorrectly extends GuessStatus
+case class GuessedWrong(wrongGuess: TriadCore, correct: TriadCore) extends GuessStatus
+case class GuessedWrongEither(wrongGuess1: TriadCore, wrongGuess2: TriadCore, correct: TriadCore) extends GuessStatus
+case class GuessedCorrectly(triadCore: TriadCore) extends GuessStatus
 
 sealed trait PracticeAction extends RootAction
 case object Randomize extends PracticeAction
@@ -21,11 +22,33 @@ case class ChangeBaseNoteName(noteName: NoteName) extends PracticeAction
 case class ChangeOctave(octave: Int) extends PracticeAction
 case class ChangeBaseNote(note: Note) extends PracticeAction
 
+sealed trait GuessAction extends RootAction
+case class UserGuessed(triadCore: TriadCore) extends GuessAction
+case class UserGuessedEither(triadCore1: TriadCore, triadCore2: TriadCore) extends GuessAction
+
+
+
+case class Guess(delegator: RootAction => Unit) {
+  val state = GuessState(
+    state = Var(NotGuessed)
+  )
+
+  def handleAction(action: RootAction): Unit = {
+    action match {
+      case action =>
+        delegator(action)
+    }
+  }
+
+}
+
+case class GuessState(state: Var[GuessStatus])
 
 case class PracticeState(rotation: Var[Rotation],
                          octaveExplode: Var[OctaveExplode],
                          triadCore: Var[TriadCore],
                          baseNote: Var[Note],
+                         guessStatus: Var[GuessStatus],
                          audioEngineReady: Var[Boolean])
 
 case class Practice(delegator: RootAction => Unit, rootState: RootState) extends RootOption {
@@ -38,6 +61,7 @@ case class Practice(delegator: RootAction => Unit, rootState: RootState) extends
       noteName <- List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#)
       octave <- List(2, 3, 4)
     } yield Note(noteName, octave))),
+    guessStatus = Var(NotGuessed),
     audioEngineReady = rootState.audioEngineReady
   )
 
@@ -51,6 +75,7 @@ case class Practice(delegator: RootAction => Unit, rootState: RootState) extends
           noteName <- List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#)
           octave <- List(2, 3, 4)
         } yield Note(noteName, octave))
+        state.guessStatus.value = NotGuessed
 
         handleAction(PlayCurrentChord)
 
@@ -64,18 +89,32 @@ case class Practice(delegator: RootAction => Unit, rootState: RootState) extends
         state.triadCore.value = triadCore
 
       case ChangeBaseNoteName(noteName: NoteName) =>
-        state.baseNote.value = Note(noteName, state.baseNote.get.octave)
+        state.baseNote.value = Note(noteName, state.baseNote.value.octave)
 
       case ChangeOctave(octave: Int) =>
-        state.baseNote.value = Note(state.baseNote.get.noteName, octave)
+        state.baseNote.value = Note(state.baseNote.value.noteName, octave)
 
       case ChangeBaseNote(noteValue) =>
         state.baseNote.value = noteValue
 
       case PlayCurrentChord =>
-        if (state.audioEngineReady.get) {
-          delegator(PlayChord(Chord(state.triadCore.get, state.rotation.get, state.octaveExplode.get, state.baseNote.get)))
+        if (state.audioEngineReady.value) {
+          delegator(PlayChord(Chord(state.triadCore.value, state.rotation.value, state.octaveExplode.value, state.baseNote.value)))
           state.audioEngineReady.value = false
+        }
+
+      case UserGuessed(triadCore) =>
+        if (state.triadCore.value == triadCore) {
+          state.guessStatus.value = GuessedCorrectly(triadCore)
+        } else {
+          state.guessStatus.value = GuessedWrong(triadCore, state.triadCore.value)
+        }
+
+      case UserGuessedEither(triadCore1, triadCore2) =>
+        if (state.triadCore.value == triadCore1 || state.triadCore.value == triadCore2) {
+          state.guessStatus.value = GuessedCorrectly(state.triadCore.value)
+        } else {
+          state.guessStatus.value = GuessedWrongEither(triadCore1, triadCore2, state.triadCore.value)
         }
 
       case action: RootAction =>

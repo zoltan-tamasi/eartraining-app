@@ -214,8 +214,8 @@ case object Minor2PlusMajor2 extends TriadCore(1, 2, 9)
 case object Major2PlusMinor2 extends TriadCore(1, 9, 2)
 case object MinorMajor extends TriadCore(1, 3, 8)
 case object MinorMajorI extends TriadCore(1, 8, 3)
-case object Major7Without5 extends TriadCore(1, 7, 4)
-case object Major7Without3 extends TriadCore(1, 4, 7)
+case object Major7With5 extends TriadCore(1, 7, 4)
+case object Major7With3 extends TriadCore(1, 4, 7)
 case object Lyd extends TriadCore(1, 5, 6)
 case object Locr extends TriadCore(1, 6, 5)
 case object Minor7Plus6 extends TriadCore(2, 2, 8)
@@ -232,7 +232,7 @@ case object Augmented extends TriadCore(4, 4, 4)
 object TriadCore {
   def fromString(string: String): TriadCore = allTriadTypes.find { _.toString == string }.get
 
-  def allTriadTypes: List[TriadCore] = List(Minor, Major, Augmented, Diminished, Major7Without5, Major7Without3,
+  def allTriadTypes: List[TriadCore] = List(Minor, Major, Augmented, Diminished, Major7With5, Major7With3,
     Stacked4s, StackedMinor2, Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor,
     MinorMajorI, Lyd, Locr, LydSus2, AugSus2)
 
@@ -249,8 +249,8 @@ object TriadCore {
       case Major2PlusMinor2 => (Minor2PlusMajor2, invertRotation(rotation))
       case MinorMajor => (MinorMajorI, invertRotation(rotation))
       case MinorMajorI => (MinorMajor, invertRotation(rotation))
-      case Major7Without5 => (Major7Without3, invertRotation(rotation))
-      case Major7Without3 => (Major7Without5, invertRotation(rotation))
+      case Major7With5 => (Major7With3, invertRotation(rotation))
+      case Major7With3 => (Major7With5, invertRotation(rotation))
       case Lyd => (Locr, invertRotation(rotation))
       case Locr => (Lyd, invertRotation(rotation))
       case Minor7Plus6 => (Minor7Plus6, rotation)
