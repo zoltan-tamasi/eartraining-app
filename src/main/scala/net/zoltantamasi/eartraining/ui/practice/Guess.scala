@@ -63,12 +63,12 @@ object GuessUI extends UIHelpers {
             {guessButton(Major7With5, handleAction).bind}
           </div>
           <div class="row justify-content-center">
-            {guessButton(Lyd, handleAction).bind}
-            {eitherButton(Lyd, Locr, handleAction).bind}
-            {guessButton(Locr, handleAction).bind}
+            {guessButton(Lydian, handleAction).bind}
+            {eitherButton(Lydian, Phrygian, handleAction).bind}
+            {guessButton(Phrygian, handleAction).bind}
           </div>
           <div class="row justify-content-center">
-            {guessButton(Minor7Plus6, handleAction).bind}
+            {guessButton(Major2Plus4, handleAction).bind}
           </div>
           <div class="row justify-content-center">
             {guessButton(Minor7With3, handleAction).bind}
@@ -76,9 +76,9 @@ object GuessUI extends UIHelpers {
             {guessButton(Minor7With5, handleAction).bind}
           </div>
           <div class="row justify-content-center">
-            {guessButton(LydSus2, handleAction).bind}
-            {eitherButton(LydSus2, AugSus2, handleAction).bind}
-            {guessButton(AugSus2, handleAction).bind}
+            {guessButton(Dominant, handleAction).bind}
+            {eitherButton(Dominant, HalfDiminished, handleAction).bind}
+            {guessButton(HalfDiminished, handleAction).bind}
           </div>
           <div class="row justify-content-center">
             {guessButton(Stacked4s, handleAction).bind}
@@ -99,27 +99,27 @@ object GuessUI extends UIHelpers {
       case GuessedCorrectly(triadCore) =>
         <div class="col-8" id="guess-chord">
           <div class="row justify-content-center">
-            <img src="/img/correct.png" />{successButton(triadCore).bind}
+            <img src="img/correct.png" />{successButton(triadCore).bind}
           </div>
         </div>
 
       case GuessedWrong(wrongGuess, correct) =>
         <div class="col-8" id="guess-chord">
           <div class="row justify-content-center">
-            <img src="/img/actual.png" /> {successButton(correct).bind}
+            <img src="img/actual.png" /> {successButton(correct).bind}
           </div>
           <div class="row justify-content-center">
-            <img src="/img/wrong.png" /> {wrongButton(wrongGuess).bind}
+            <img src="img/wrong.png" /> {wrongButton(wrongGuess).bind}
           </div>
         </div>
 
       case GuessedWrongEither(wrongGuess1, wrongGuess2, correct) =>
         <div class="col-8" id="guess-chord">
           <div class="row justify-content-center">
-            <img src="/img/actual.png" /> {successButton(correct).bind}
+            <img src="img/actual.png" /> {successButton(correct).bind}
           </div>
           <div class="row justify-content-center">
-            <img src="/img/wrong.png" />
+            <img src="img/wrong.png" />
             {wrongButton(wrongGuess1).bind}
             {wrongButton(wrongGuess2).bind}
           </div>

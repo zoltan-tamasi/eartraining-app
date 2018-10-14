@@ -55,6 +55,15 @@ object NoteWheel extends UIHelpers {
         }
       </div>
       <div id="chord-notes" class="col-4">
+        Semitone-intervals:
+        <br/>
+        {
+          Chord.intervals(Chord(triadCore.bind,
+            rotationBinding.bind,
+            octaveExplode.bind,
+            Note(baseNote.bind.noteName, baseNote.bind.octave))).mkString("(",  ",", ")")
+        }
+        <br/>
         Chord notes:
         <br/>
         {

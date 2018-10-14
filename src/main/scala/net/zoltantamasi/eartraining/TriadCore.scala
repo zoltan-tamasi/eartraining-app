@@ -2,6 +2,8 @@ package net.zoltantamasi.eartraining
 
 case class Note(noteName: NoteName, octave: Int) {
 
+  def + (toAdd: Int) = Note.add(this, toAdd)
+
   def <= (that: Note) = Note.lessThanOrEqual(this, that)
 
   def >= (that: Note) = Note.lessThanOrEqual(that, this)
@@ -172,35 +174,32 @@ case class Chord(core: TriadCore, rotation: Rotation, octaveExplode: OctaveExplo
 }
 
 object Chord {
-  def notesOf(chord: Chord): List[Note] = {
+  def intervals(chord: Chord): List[Int] = {
     chord.rotation match {
-      case Rotation0 => {
-        val note1 = chord.baseNote
-        var note2 = Note.add(note1, chord.core.intervals._1)
-        val note3 = Note.add(note2, chord.core.intervals._2)
-        if (chord.octaveExplode == OctaveExploded) {
-          note2 = Note.add(note2, 12)
-        }
-        List(note1, note2, note3)
-      }
-      case Rotation1 => {
-        val note1 = chord.baseNote
-        var note2 = Note.add(note1, chord.core.intervals._2)
-        val note3 = Note.add(note2, chord.core.intervals._3)
-        if (chord.octaveExplode == OctaveExploded) {
-          note2 = Note.add(note2, 12)
-        }
-        List(note1, note2, note3)
-      }
-      case Rotation2 => {
-        val note1 = chord.baseNote
-        var note2 = Note.add(note1, chord.core.intervals._3)
-        val note3 = Note.add(note2, chord.core.intervals._1)
-        if (chord.octaveExplode == OctaveExploded) {
-          note2 = Note.add(note2, 12)
-        }
-        List(note1, note2, note3)
-      }
+      case Rotation0 =>
+        List(chord.core.intervals._1, chord.core.intervals._2, chord.core.intervals._3)
+
+      case Rotation1 =>
+        List(chord.core.intervals._2, chord.core.intervals._3, chord.core.intervals._1)
+
+      case Rotation2 =>
+        List(chord.core.intervals._3, chord.core.intervals._1, chord.core.intervals._2)
+    }
+  }
+
+  def notesOf(chord: Chord): List[Note] = {
+
+    val intervals: List[List[Note] => List[Note]] =
+      Chord.intervals(chord).take(2)
+        .map(interval => Note.add(_: Note, interval))
+        .map(noteOp => (list: List[Note]) => list :+ noteOp(list.last))
+
+    val notes = Function.chain(intervals)(List(chord.baseNote))
+
+    if (chord.octaveExplode == OctaveExploded) {
+      List(notes(0), notes(1) + 12, notes(2))
+    } else {
+      notes
     }
   }
 }
@@ -216,13 +215,13 @@ case object MinorMajor extends TriadCore(1, 3, 8)
 case object MinorMajorI extends TriadCore(1, 8, 3)
 case object Major7With5 extends TriadCore(1, 7, 4)
 case object Major7With3 extends TriadCore(1, 4, 7)
-case object Lyd extends TriadCore(1, 5, 6)
-case object Locr extends TriadCore(1, 6, 5)
-case object Minor7Plus6 extends TriadCore(2, 2, 8)
+case object Lydian extends TriadCore(1, 5, 6)
+case object Phrygian extends TriadCore(1, 6, 5)
+case object Major2Plus4 extends TriadCore(2, 2, 8)
 case object Minor7With3 extends TriadCore(2, 3, 7)
 case object Minor7With5 extends TriadCore(2, 7, 3)
-case object LydSus2 extends TriadCore(2, 4, 6)
-case object AugSus2 extends TriadCore(2, 6, 4)
+case object Dominant extends TriadCore(2, 4, 6)
+case object HalfDiminished extends TriadCore(2, 6, 4)
 case object Stacked4s extends TriadCore(2, 5, 5)
 case object Diminished extends TriadCore(3, 3, 6)
 case object Minor extends TriadCore(3, 4, 5)
@@ -232,9 +231,9 @@ case object Augmented extends TriadCore(4, 4, 4)
 object TriadCore {
   def fromString(string: String): TriadCore = allTriadTypes.find { _.toString == string }.get
 
-  def allTriadTypes: List[TriadCore] = List(Minor, Major, Augmented, Diminished, Major7With5, Major7With3,
-    Stacked4s, StackedMinor2, Minor2PlusMajor2, Major2PlusMinor2, Minor7Plus6, Minor7With3, Minor7With5, MinorMajor,
-    MinorMajorI, Lyd, Locr, LydSus2, AugSus2)
+  def allTriadTypes: List[TriadCore] = List(StackedMinor2, Minor2PlusMajor2, Major2PlusMinor2, MinorMajor, MinorMajorI,
+    Major7With5, Major7With3, Lydian, Phrygian, Major2Plus4, Minor7With3, Minor7With5, Dominant, HalfDiminished,
+    Stacked4s, Diminished, Minor, Major, Augmented)
 
   def invert(triadCore: TriadCore, rotation: Rotation): (TriadCore, Rotation) = {
     def invertRotation(rotation: Rotation): Rotation = rotation match {
@@ -251,13 +250,13 @@ object TriadCore {
       case MinorMajorI => (MinorMajor, invertRotation(rotation))
       case Major7With5 => (Major7With3, invertRotation(rotation))
       case Major7With3 => (Major7With5, invertRotation(rotation))
-      case Lyd => (Locr, invertRotation(rotation))
-      case Locr => (Lyd, invertRotation(rotation))
-      case Minor7Plus6 => (Minor7Plus6, rotation)
+      case Lydian => (Phrygian, invertRotation(rotation))
+      case Phrygian => (Lydian, invertRotation(rotation))
+      case Major2Plus4 => (Major2Plus4, rotation)
       case Minor7With3 => (Minor7With5, invertRotation(rotation))
       case Minor7With5 => (Minor7With3, invertRotation(rotation))
-      case LydSus2 => (AugSus2, invertRotation(rotation))
-      case AugSus2 => (LydSus2, invertRotation(rotation))
+      case Dominant => (HalfDiminished, invertRotation(rotation))
+      case HalfDiminished => (Dominant, invertRotation(rotation))
       case Stacked4s => (Stacked4s, rotation)
       case Diminished => (Diminished, rotation)
       case Minor => (Major, invertRotation(rotation))

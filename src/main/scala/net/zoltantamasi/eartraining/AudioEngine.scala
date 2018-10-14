@@ -77,7 +77,7 @@ object AudioEngine {
     def loadSound(url: String): Future[AudioBuffer] = {
       val p = Promise[AudioBuffer]()
       Ajax
-        .get(url, responseType = "arraybuffer")
+        .get("sounds/" + url, responseType = "arraybuffer")
         .map(request => {
           val arrayBuffer = request.response.asInstanceOf[ArrayBuffer]
           context.decodeAudioData(arrayBuffer, (buffer: AudioBuffer) => {
@@ -130,6 +130,8 @@ object AudioEngine {
       c3 <- loadSound("c3mmell.wav")
       c4 <- loadSound("c4mmell.wav")
       c5 <- loadSound("c5mmell.wav")
+      c6 <- loadSound("c6mmell.wav")
+      c7 <- loadSound("c7mmell.wav")
 
       eb2 <- loadSound("eb2mmell.wav")
       eb3 <- loadSound("eb3mmell.wav")
@@ -162,6 +164,8 @@ object AudioEngine {
         Note(C, 3) -> (c3, 1.0),
         Note(C, 4) -> (c4, 1.0),
         Note(C, 5) -> (c5, 1.0),
+        Note(C, 6) -> (c6, 1.0),
+        Note(C, 7) -> (c7, 1.0),
 
         Note(D_#, 2) -> (eb2, 1.0),
         Note(D_#, 3) -> (eb3, 1.0),
