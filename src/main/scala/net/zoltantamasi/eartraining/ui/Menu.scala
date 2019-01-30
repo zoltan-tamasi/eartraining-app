@@ -1,19 +1,19 @@
 package net.zoltantamasi.eartraining.ui
 
 import com.thoughtworks.binding.{Binding, dom}
-import net.zoltantamasi.eartraining.state.{Menu, ToQuery, ToTrichordGenerator}
+import net.zoltantamasi.eartraining.state._
 import org.scalajs.dom.{Event, Node}
 
-object MenuUI extends StateToUI[Menu] {
+object MenuUI extends StateToUI[MenuState] {
 
   @dom
-  def toUI(menu: Menu): Binding[Node] = {
+  def toUI(menu: MenuState, actionHandler: RootAction => Unit): Binding[Node] = {
     <div class="col-8">
       <div class="row">
         With the generator you can experiment with the triad cores, listen and compare them in different setups and on different base notes.
       </div>
       <div class="row">
-        <button type="button" class="btn btn-primary" onclick={(_: Event) => menu.handleAction(ToTrichordGenerator)}>
+        <button type="button" class="btn btn-primary" onclick={(_: Event) => actionHandler(TrichordGeneratorOptionSelected)}>
           Trichord generator
         </button>
       </div>
@@ -23,7 +23,7 @@ object MenuUI extends StateToUI[Menu] {
         recognition if needed. 
       </div>
       <div class="row">        
-        <button type="button" class="btn btn-primary" onclick={(_: Event) => menu.handleAction(ToQuery)}>
+        <button type="button" class="btn btn-primary" onclick={(_: Event) => actionHandler(QueryOptionSelected)}>
           Practice hearing trichords
         </button>
       </div>

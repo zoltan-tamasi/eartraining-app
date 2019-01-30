@@ -22,50 +22,44 @@ case class ChangeBaseNoteName(noteName: NoteName) extends PracticeAction
 case class ChangeOctave(octave: Int) extends PracticeAction
 case class ChangeBaseNote(note: Note) extends PracticeAction
 
-sealed trait GuessAction extends RootAction
+sealed trait GuessAction extends PracticeAction
 case class UserGuessed(triadCore: TriadCore) extends GuessAction
 case class UserGuessedEither(triadCore1: TriadCore, triadCore2: TriadCore) extends GuessAction
 
-
-
-case class Guess(delegator: RootAction => Unit) {
-  val state = GuessState(
-    state = Var(NotGuessed)
-  )
-
-  def handleAction(action: RootAction): Unit = {
-    action match {
-      case action =>
-        delegator(action)
-    }
-  }
-
-}
-
-case class GuessState(state: Var[GuessStatus])
 
 case class PracticeState(rotation: Var[Rotation],
                          octaveExplode: Var[OctaveExplode],
                          triadCore: Var[TriadCore],
                          baseNote: Var[Note],
                          guessStatus: Var[GuessStatus],
-                         audioEngineReady: Var[Boolean])
+                         audioEngineReady: Var[Boolean]) extends RootOption
 
-case class Practice(delegator: RootAction => Unit, rootState: RootState) extends RootOption {
+object Practice extends StateHandler[PracticeState, PracticeAction] {
 
-  val state = PracticeState(
-    rotation = Var(pullRandom(List(Rotation0, Rotation1, Rotation2))),
-    octaveExplode = Var(pullRandom(List(OctaveExploded, NotOctaveExploded))),
-    triadCore = Var(pullRandom(TriadCore.allTriadTypes)),
-    baseNote = Var(pullRandom(for {
-      noteName <- List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#)
-      octave <- List(2, 3, 4)
-    } yield Note(noteName, octave))),
-    guessStatus = Var(NotGuessed),
-    audioEngineReady = rootState.audioEngineReady
-  )
+  def getInitial(audioEngineReady: Var[Boolean] = Var(false)): PracticeState =
+    PracticeState(
+      rotation = Var(pullRandom(List(Rotation0, Rotation1, Rotation2))),
+      octaveExplode = Var(pullRandom(List(OctaveExploded, NotOctaveExploded))),
+      triadCore = Var(pullRandom(TriadCore.allTriadTypes)),
+      baseNote = Var(pullRandom(for {
+        noteName <- List(C, C_#, D, D_#, E, F, F_#, G, G_#, A, A_#)
+        octave <- List(2, 3, 4)
+      } yield Note(noteName, octave))),
+      guessStatus = Var(NotGuessed),
+      audioEngineReady = audioEngineReady
+    )
 
-  def handleAction(action: RootAction): Unit = {
+  private def playCurrentChord(state: PracticeState): Effect = {
+    println(state.audioEngineReady.value)
+    if (state.audioEngineReady.value) {
+      state.audioEngineReady.value = false
+      PlayChordEffect(Chord(state.triadCore.value, state.rotation.value, state.octaveExplode.value, state.baseNote.value))
+    } else {
+      NoEffect
+    }
+  }
+
+  def handleAction(state: PracticeState, action: PracticeAction): Effect = {
     action match {
       case Randomize =>
         state.rotation.value = pullRandom(List(Rotation0, Rotation1, Rotation2))
@@ -77,31 +71,34 @@ case class Practice(delegator: RootAction => Unit, rootState: RootState) extends
         } yield Note(noteName, octave))
         state.guessStatus.value = NotGuessed
 
-        handleAction(PlayCurrentChord)
+        playCurrentChord(state)
+
+      case PlayCurrentChord =>
+        playCurrentChord(state)
 
       case ChangeRotation(rotation: Rotation) =>
         state.rotation.value = rotation
+        NoEffect
 
       case ChangeOctaveExploded(enabled: OctaveExplode) =>
         state.octaveExplode.value = enabled
+        NoEffect
 
       case ChangeTriadCore(triadCore: TriadCore) =>
         state.triadCore.value = triadCore
+        NoEffect
 
       case ChangeBaseNoteName(noteName: NoteName) =>
         state.baseNote.value = Note(noteName, state.baseNote.value.octave)
+        NoEffect
 
       case ChangeOctave(octave: Int) =>
         state.baseNote.value = Note(state.baseNote.value.noteName, octave)
+        NoEffect
 
       case ChangeBaseNote(noteValue) =>
         state.baseNote.value = noteValue
-
-      case PlayCurrentChord =>
-        if (state.audioEngineReady.value) {
-          delegator(PlayChord(Chord(state.triadCore.value, state.rotation.value, state.octaveExplode.value, state.baseNote.value)))
-          state.audioEngineReady.value = false
-        }
+        NoEffect
 
       case UserGuessed(triadCore) =>
         if (state.triadCore.value == triadCore) {
@@ -109,6 +106,7 @@ case class Practice(delegator: RootAction => Unit, rootState: RootState) extends
         } else {
           state.guessStatus.value = GuessedWrong(triadCore, state.triadCore.value)
         }
+        NoEffect
 
       case UserGuessedEither(triadCore1, triadCore2) =>
         if (state.triadCore.value == triadCore1 || state.triadCore.value == triadCore2) {
@@ -116,9 +114,7 @@ case class Practice(delegator: RootAction => Unit, rootState: RootState) extends
         } else {
           state.guessStatus.value = GuessedWrongEither(triadCore1, triadCore2, state.triadCore.value)
         }
-
-      case action: RootAction =>
-        delegator(action)
+        NoEffect
     }
   }
 

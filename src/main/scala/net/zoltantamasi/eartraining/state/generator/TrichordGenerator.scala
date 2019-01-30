@@ -25,23 +25,24 @@ case class TrichordGeneratorState(rotation: Var[Rotation],
                                   baseNoteLocked: Var[Boolean],
                                   rotationLocked: Var[Boolean],
                                   octaveExplodeLocked: Var[Boolean],
-                                  audioEngineReady: Var[Boolean])
+                                  audioEngineReady: Var[Boolean])  extends RootOption
 
-case class TrichordGenerator(delegator: RootAction => Unit, rootState: RootState) extends RootOption {
+object TrichordGenerator extends StateHandler[TrichordGeneratorState, TrichordGeneratorAction] {
 
-  val state = TrichordGeneratorState(
-    rotation = Var(Rotation0),
-    octaveExplode = Var(NotOctaveExploded),
-    triadCore = Var(Major),
-    baseNote = Var(Note(C, 3)),
-    triadCoreLocked = Var(false),
-    baseNoteLocked = Var(false),
-    rotationLocked = Var(false),
-    octaveExplodeLocked = Var(false),
-    audioEngineReady = rootState.audioEngineReady
-  )
+  def getInitial(audioEngineReady: Var[Boolean] = Var(false)) =
+    TrichordGeneratorState(
+      rotation = Var(Rotation0),
+      octaveExplode = Var(NotOctaveExploded),
+      triadCore = Var(Major),
+      baseNote = Var(Note(C, 3)),
+      triadCoreLocked = Var(false),
+      baseNoteLocked = Var(false),
+      rotationLocked = Var(false),
+      octaveExplodeLocked = Var(false),
+      audioEngineReady = audioEngineReady
+    )
 
-  def handleAction(action: RootAction): Unit = {
+  def handleAction(state: TrichordGeneratorState, action: TrichordGeneratorAction): Effect = {
     action match {
       case Randomize =>
         if (!state.rotationLocked.value) {
@@ -59,24 +60,31 @@ case class TrichordGenerator(delegator: RootAction => Unit, rootState: RootState
             octave <- List(2, 3, 4)
           } yield Note(noteName, octave))
         }
+        NoEffect
 
       case ChangeRotation(rotation: Rotation) =>
         state.rotation.value = rotation
+        NoEffect
 
       case ChangeOctaveExploded(enabled: OctaveExplode) =>
         state.octaveExplode.value = enabled
+        NoEffect
 
       case ChangeTriadCore(triadCore: TriadCore) =>
         state.triadCore.value = triadCore
+        NoEffect
 
       case ChangeBaseNoteName(noteName: NoteName) =>
         state.baseNote.value = Note(noteName, state.baseNote.get.octave)
+        NoEffect
 
       case ChangeOctave(octave: Int) =>
         state.baseNote.value = Note(state.baseNote.get.noteName, octave)
+        NoEffect
 
       case ChangeBaseNote(noteValue) =>
         state.baseNote.value = noteValue
+        NoEffect
 
       case Invert =>
         TriadCore.invert(state.triadCore.value, state.rotation.value) match {
@@ -84,15 +92,15 @@ case class TrichordGenerator(delegator: RootAction => Unit, rootState: RootState
             state.triadCore.value = triadCore
             state.rotation.value = rotation
         }
+        NoEffect
 
       case PlayCurrentChord =>
-        if (state.audioEngineReady.get) {
-          delegator(PlayChord(Chord(state.triadCore.get, state.rotation.get, state.octaveExplode.get, state.baseNote.get)))
+        if (state.audioEngineReady.value) {
           state.audioEngineReady.value = false
+          PlayChordEffect(Chord(state.triadCore.get, state.rotation.get, state.octaveExplode.get, state.baseNote.get))
+        } else {
+          NoEffect
         }
-
-      case action: RootAction =>
-        delegator(action)
     }
   }
 

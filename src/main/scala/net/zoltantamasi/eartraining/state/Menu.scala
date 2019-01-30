@@ -1,22 +1,13 @@
 package net.zoltantamasi.eartraining.state
 
 sealed trait MenuAction extends RootAction
-case object ToQuery extends MenuAction
-case object ToTrichordGenerator extends MenuAction
 
-case class Menu(delegator: RootAction => Unit) extends RootOption {
+case class MenuState() extends RootOption
 
-  def handleAction(action: RootAction): Unit = {
-    action match {
+object Menu extends StateHandler[MenuState, MenuAction] {
 
-      case ToQuery =>
-        delegator(QueryOptionSelected)
+  def getInitial(): MenuState = MenuState()
 
-      case ToTrichordGenerator =>
-        delegator(TrichordGeneratorOptionSelected)
+  def handleAction(state: MenuState, action: MenuAction): Effect = NoEffect
 
-      case action:RootAction =>
-        delegator(action)
-    }
-  }
 }
