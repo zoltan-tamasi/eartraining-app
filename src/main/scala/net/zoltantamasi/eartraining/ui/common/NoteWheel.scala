@@ -13,11 +13,11 @@ object NoteWheel extends UIHelpers {
   private def getImageAndRotation(triadCore: TriadCore, rotation: Rotation): (String, String) = {
     val imageRotation = rotation match {
       case Rotation0 => 0
-      case Rotation1 => triadCore.intervals._1 * -30
-      case Rotation2 => (triadCore.intervals._1 + triadCore.intervals._2) * -30
+      case Rotation1 => triadCore.intervals._1
+      case Rotation2 => (triadCore.intervals._1 + triadCore.intervals._2)
     }
 
-    (triadCore.getImage, s"transform: rotate(${imageRotation}deg)")
+    (triadCore.getImage, s"rotation-${imageRotation}")
   }
 
   private def getNoteWheel(triadCore: TriadCore, rotation: Rotation, octaveExplode: OctaveExplode, baseNote: Note): List[(NoteName, Int, Boolean)] = {
@@ -51,7 +51,7 @@ object NoteWheel extends UIHelpers {
         }
         {
           val (image, rotation) = getImageAndRotation(triadCore.bind, rotationBinding.bind)
-          <img src={image} style={rotation}></img>
+          <img src={image} class={rotation}></img>
         }
       </div>
       <div id="chord-notes" class="col-4">

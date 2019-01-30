@@ -19,6 +19,54 @@
     height: 200px;
 }
 
+#note-wheel img.rotation-0 {
+    transform: rotate(0deg)
+}
+
+#note-wheel img.rotation-1 {
+    transform: rotate(-30deg)
+}
+
+#note-wheel img.rotation-2 {
+    transform: rotate(-60deg)
+}
+
+#note-wheel img.rotation-3 {
+    transform: rotate(-90deg)
+}
+
+#note-wheel img.rotation-4 {
+    transform: rotate(-120deg)
+}
+
+#note-wheel img.rotation-5 {
+    transform: rotate(-150deg)
+}
+
+#note-wheel img.rotation-6 {
+    transform: rotate(-180deg)
+}
+
+#note-wheel img.rotation-7 {
+    transform: rotate(-210deg)
+}
+
+#note-wheel img.rotation-8 {
+    transform: rotate(-240deg)
+}
+
+#note-wheel img.rotation-9 {
+    transform: rotate(-270deg)
+}
+
+#note-wheel img.rotation-10 {
+    transform: rotate(-300deg)
+}
+
+#note-wheel img.rotation-11 {
+    transform: rotate(-330deg)
+}
+
 #guess-chord img {
     width: 80px;
     height: 80px;
