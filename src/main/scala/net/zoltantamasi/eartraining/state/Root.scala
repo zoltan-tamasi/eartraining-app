@@ -3,7 +3,7 @@ package net.zoltantamasi.eartraining.state
 import com.thoughtworks.binding.Binding.Var
 import net.zoltantamasi.eartraining.state.generator.{TrichordGenerator, TrichordGeneratorAction, TrichordGeneratorState}
 import net.zoltantamasi.eartraining.state.practice.{Practice, PracticeAction, PracticeState}
-import net.zoltantamasi.eartraining.{AudioEngine, Chord}
+import net.zoltantamasi.eartraining.{AudioEngine}
 
 trait RootOption
 

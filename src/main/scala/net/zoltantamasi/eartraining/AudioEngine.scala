@@ -26,21 +26,6 @@ object AudioEngine {
   //reciprocal of above
   val predecessorMultiplier = 0.94387431268
 
-  private def playbackRate(note: NoteName): Double = note match {
-    case C => 1.0
-    case C_# => 1.059463
-    case D => 1.122462
-    case D_# => 1.189207
-    case E => 1.259921
-    case F => 1.334840
-    case F_# => 1.414214
-    case G => 1.498307
-    case G_# => 1.587401
-    case A => 1.681793
-    case A_# => 1.781797
-    case B => 1.887749
-  }
-
   private def playSound(note: Note)(implicit context: AudioContext, audioBuffers: Map[Note, (AudioBuffer, Double)]): Future[Unit] = {
     val source = context.createBufferSource()
     val audioBuffer = audioBuffers.get(note)
@@ -51,7 +36,7 @@ object AudioEngine {
     source.buffer = audioBuffer match {
       case Some((audioBuffer, _)) => audioBuffer
       case None => {
-        println(s"Not supported octave: 6, playing octave 5")
+        println(s"Not supported note: $note")
         audioBuffers.get(note.copy(octave = 5)).get._1
       }
     }
